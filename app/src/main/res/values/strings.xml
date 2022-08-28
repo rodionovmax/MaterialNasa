@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">MaterialNasa</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_pod">POD</string>
+    <string name="title_explore">Explore</string>
+    <string name="title_gallery">Gallery</string>
+    <string name="title_search">Search</string>
+    <string name="title_settings">Settings</string>
 </resources>
