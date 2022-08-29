@@ -12,4 +12,5 @@
     <color name="yellow">#E5ED0E</color>
     <color name="chip_unselected">#f5f5f5</color>
     <color name="chip_selected">#ffccbc</color>
+    <color name="violet">#5D1049</color>
 </resources>
