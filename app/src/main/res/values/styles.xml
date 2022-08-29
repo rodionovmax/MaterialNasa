@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ScreenTitle">
+        <item name="android:textSize">24sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MyActionBar" parent="Widget.MaterialComponents.ActionBar.Primary">
+        <item name="background">@color/grey</item>
+    </style>
+
+    <style name="PictureTitle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold|italic</item>
+    </style>
+
+    <style name="PictureDescription">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ChipChoice" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background_color</item>
+    </style>
+
+</resources>
