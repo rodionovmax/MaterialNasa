@@ -1,6 +1,8 @@
 package com.rodionovmax.materialnasa.ui.pod
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.rodionovmax.materialnasa.databinding.FragmentPodBinding
 import com.rodionovmax.materialnasa.domain.model.Pod
 
@@ -36,13 +39,24 @@ class PodFragment : Fragment() {
         initViewModel()
     }
 
+    @SuppressLint("RestrictedApi")
     private fun initViews() {
-        binding.chipGroup.setOnCheckedChangeListener { chipGroup, position ->
-            val chip: Chip = binding.chipGroup.findViewById(position)
-            viewModel.setDateOnChipClicked(position)
+        showProgress(false)
+        binding.chipGroup.setOnCheckedChangeListener { chipGroup: ChipGroup, position: Int ->
+            val selectedChip: Chip? = binding.chipGroup.findViewById(position)
+            var index = 0
+            for (i in 0 until chipGroup.childCount) {
+                val chip = chipGroup.getChildAt(i)
+                if (chip == selectedChip) {
+                    index = i
+                    break
+                }
+            }
+            Log.d("myTag", "chip index: $index")
+            viewModel.setDateOnChipClicked(index)
             Toast.makeText(
                 requireContext(),
-                "Selected picture from ${chip.text}",
+                "Selected picture from ${selectedChip?.text}",
                 Toast.LENGTH_SHORT
             ).show()
         }
