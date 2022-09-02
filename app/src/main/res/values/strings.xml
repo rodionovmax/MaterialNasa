@@ -16,4 +16,5 @@
     <string name="chip_yesterday">Yesterday</string>
     <string name="chip_today">Today</string>
     <string name="chip_two_days_ago">Two days ago</string>
+    <string name="gallery_image_desc">Gallery image</string>
 </resources>
