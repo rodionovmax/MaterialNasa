@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.ui.pod
 
-import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,17 +12,19 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.rodionovmax.materialnasa.databinding.FragmentPodBinding
 import com.rodionovmax.materialnasa.domain.model.Pod
+
 
 class PodFragment : Fragment() {
 
     private var _binding: FragmentPodBinding? = null
     private val binding get() = _binding!!
     private val viewModel: PodViewModel by lazy { ViewModelProvider(this)[PodViewModel::class.java] }
+    val prefs: SharedPreferences by lazy { requireActivity().getSharedPreferences("pref", Context.MODE_PRIVATE) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,10 +42,9 @@ class PodFragment : Fragment() {
         initViewModel()
     }
 
-    @SuppressLint("RestrictedApi")
     private fun initViews() {
         showProgress(false)
-        binding.chipGroup.setOnCheckedChangeListener { chipGroup: ChipGroup, position: Int ->
+        /*binding.chipGroup.setOnCheckedChangeListener { chipGroup: ChipGroup, position: Int ->
             val selectedChip: Chip? = binding.chipGroup.findViewById(position)
             var index = 0
             for (i in 0 until chipGroup.childCount) {
@@ -54,11 +56,23 @@ class PodFragment : Fragment() {
             }
             Log.d("myTag", "chip index: $index")
             viewModel.setDateOnChipClicked(index)
-            Toast.makeText(
-                requireContext(),
-                "Selected picture from ${selectedChip?.text}",
-                Toast.LENGTH_SHORT
-            ).show()
+            viewModel.triggerEvent()
+        }*/
+
+        binding.chipGroup.setOnCheckedStateChangeListener { chipGroup, checkedIds ->
+            val selectedChip: Chip? = binding.chipGroup.findViewById(checkedIds[0])
+
+            var index = 0
+            for (i in 0 until chipGroup.childCount) {
+                val chip = chipGroup.getChildAt(i)
+                if (chip == selectedChip) {
+                    index = i
+                    break
+                }
+            }
+            Log.d("myTag", "chip index: $index")
+            viewModel.setDateOnChipClicked(index)
+            viewModel.triggerEvent(selectedChip?.text as String)
         }
     }
 
@@ -66,6 +80,19 @@ class PodFragment : Fragment() {
         viewModel.progressLiveData.observe(viewLifecycleOwner) { showProgress(it) }
         viewModel.podLiveData.observe(viewLifecycleOwner, Observer<Pod> { showPod(it) })
         viewModel.errorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        /*viewModel.displayToastLiveData.observe(viewLifecycleOwner, Observer<Boolean> {
+            Toast.makeText(requireContext(), "Bla bla bla", Toast.LENGTH_SHORT).show()
+        })*/
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.eventFlow.collect { event ->
+                when(event) {
+                    is PodViewModel.PodEvent.ToastEvent -> {
+                        Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun showPod(pod: Pod) {
