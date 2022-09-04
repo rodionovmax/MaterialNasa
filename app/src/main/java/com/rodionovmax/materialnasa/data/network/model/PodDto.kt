@@ -1,4 +1,4 @@
-package com.rodionovmax.materialnasa.data.model
+package com.rodionovmax.materialnasa.data.network.model
 
 import com.google.gson.annotations.SerializedName
 import com.rodionovmax.materialnasa.domain.model.Pod
@@ -12,14 +12,4 @@ data class PodDto(
     @SerializedName("service_version") val serviceVersion: String,
     @SerializedName("title") val title: String,
     @SerializedName("url") val url: String
-)
-
-fun PodDto.asDomainPod() = Pod(
-    copyright = copyright ?: "",
-    date = date,
-    description = explanation,
-    hdUrl = hdUrl ?: "",
-    mediaType = mediaType,
-    title = title,
-    url = url
 )

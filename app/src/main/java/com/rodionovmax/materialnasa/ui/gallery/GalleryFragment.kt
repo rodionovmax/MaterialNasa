@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
-import com.rodionovmax.materialnasa.domain.model.FavoritePod
 
 class GalleryFragment : Fragment() {
 

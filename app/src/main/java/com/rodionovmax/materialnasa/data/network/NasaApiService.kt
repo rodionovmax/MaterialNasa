@@ -1,6 +1,6 @@
-package com.rodionovmax.materialnasa.data
+package com.rodionovmax.materialnasa.data.network
 
-import com.rodionovmax.materialnasa.data.model.PodDto
+import com.rodionovmax.materialnasa.data.network.model.PodDto
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query

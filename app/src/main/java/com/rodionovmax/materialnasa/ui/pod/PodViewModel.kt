@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rodionovmax.materialnasa.data.RemoteRepoImpl
 import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.domain.repo.LocalRepo
 import com.rodionovmax.materialnasa.domain.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.SingleEventLiveData
 import com.rodionovmax.materialnasa.utils.getDateWithOffset
@@ -14,22 +14,19 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class PodViewModel(
-    private val remoteRepo: RemoteRepo = RemoteRepoImpl()
+    private val remoteRepo: RemoteRepo,
+    private val localRepo: LocalRepo
 ) : ViewModel() {
 
     val podLiveData: LiveData<Pod> get() = _podLiveData
     val errorLiveData: LiveData<Throwable> get() = _errorLiveData
     val progressLiveData: LiveData<Boolean> get() = _progressLiveData
-    val displayToastLiveData: LiveData<Boolean> get() = _displayToastLiveData
-    val chipIdLiveData: LiveData<Int> get() = _chipIdLiveData
 
     private val _podLiveData: MutableLiveData<Pod> = MutableLiveData()
     private val _errorLiveData: MutableLiveData<Throwable> = SingleEventLiveData()
     private val _progressLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    private val _displayToastLiveData: MutableLiveData<Boolean> = SingleEventLiveData()
-    private val _chipIdLiveData: MutableLiveData<Int> = MutableLiveData()
 
-    private fun loadData(date: String) {
+    private fun loadPodFromInternet(date: String) {
         _progressLiveData.postValue(true)
         remoteRepo.getPictureOfTheDay(
             date,
@@ -51,17 +48,29 @@ class PodViewModel(
             1 -> date = getDateWithOffset(1)
             2 -> date = getDateWithOffset(2)
         }
-        loadData(date)
-        showToast(true)
+        if (isPodSavedInGallery(date)) {
+            getPodFromDatabase(date)
+        } else {
+            loadPodFromInternet(date)
+        }
     }
 
-    fun showToast(toShow: Boolean) {
-        _displayToastLiveData.postValue(toShow)
+    private fun getPodFromDatabase(date: String) {
+        _progressLiveData.postValue(true)
+        val podFromDb = localRepo.getPodByDate(date)
+        podFromDb?.let {
+            _progressLiveData.postValue(false)
+            _podLiveData.postValue(it)
+        }
     }
 
-    fun saveChipId(chipId: Int): Int {
-        _chipIdLiveData.postValue(chipId)
-        return chipId
+    fun savePodToGallery(pod: Pod) {
+        localRepo.addPodToGallery(pod)
+    }
+
+    private fun isPodSavedInGallery(date: String): Boolean {
+        val pod = localRepo.getPodByDate(date)
+        return pod?.isSaved ?: false
     }
 
     sealed class PodEvent() {

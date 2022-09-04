@@ -11,5 +11,6 @@ data class Pod (
     val hdUrl: String?,
     val mediaType: String,
     val title: String,
-    val url: String
+    val url: String,
+    var isSaved: Boolean
 ) : Parcelable
