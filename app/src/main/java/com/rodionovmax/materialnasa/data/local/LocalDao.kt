@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.rodionovmax.materialnasa.domain.model.Pod
 
 @Dao
 interface LocalDao {
@@ -12,7 +11,7 @@ interface LocalDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addToPodGallery(galleryEntity: GalleryPodEntity)
 
-    @Query("SELECT * FROM favorite_pod")
+    @Query("SELECT * FROM favorite_pod ORDER BY id DESC")
     fun getAllFromGallery(): List<GalleryPodEntity>
 
     @Query("SELECT * FROM favorite_pod WHERE date == :selectedDate")

@@ -15,12 +15,12 @@ class GalleryViewHolder(
 ){
     private val binding = GalleryItemBinding.bind(itemView)
 
-    fun bind(favoritePod: Pod) {
-        Glide.with(itemView.context).load(favoritePod.url).into(binding.galleryItemImage)
-        binding.galleryItemTitle.text = favoritePod.title
-        favoritePod.copyright?.let {
-            binding.galleryItemCopyright.text = favoritePod.copyright
+    fun bind(galleryItem: Pod) {
+        Glide.with(itemView.context).load(galleryItem.url).into(binding.galleryItemImage)
+        binding.galleryItemTitle.text = galleryItem.title
+        galleryItem.copyright?.let {
+            binding.galleryItemCopyright.text = galleryItem.copyright
         }
-        binding.galleryItemDate.text = favoritePod.date
+        binding.galleryItemDate.text = galleryItem.date
     }
 }

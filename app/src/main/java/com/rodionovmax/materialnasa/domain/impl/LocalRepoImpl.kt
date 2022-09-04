@@ -36,5 +36,15 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
         return pod?.asDomainPod()
     }
 
-
+    override fun getAllFromGallery(): List<Pod> {
+        var gallery = listOf<Pod>()
+        runBlocking {
+            launch(Dispatchers.Default) {
+                withContext(Dispatchers.IO) {
+                    gallery = localDataSource.getAllFromGallery().map { it.asDomainPod() }
+                }
+            }
+        }
+        return gallery
+    }
 }
