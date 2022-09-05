@@ -21,6 +21,11 @@ class GalleryAdapter : RecyclerView.Adapter<GalleryViewHolder>() {
 
     override fun onBindViewHolder(holder: GalleryViewHolder, position: Int) {
         holder.bind(gallery[position])
+        holder.updateView()
+
+        holder.onDeleteClick = {
+            removeItem(it)
+        }
     }
 
     override fun getItemCount(): Int = gallery.size
@@ -31,5 +36,13 @@ class GalleryAdapter : RecyclerView.Adapter<GalleryViewHolder>() {
         notifyDataSetChanged()
     }
 
+    private fun removeItem(viewHolder: RecyclerView.ViewHolder) {
+
+        val position = viewHolder.adapterPosition
+        // remove data
+        gallery.removeAt(position)
+        // remove item
+        notifyItemRemoved(position)
+    }
 }
 

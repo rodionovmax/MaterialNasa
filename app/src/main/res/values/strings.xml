@@ -18,4 +18,6 @@
     <string name="chip_two_days_ago">Two days ago</string>
     <string name="gallery_image_desc">Gallery image</string>
     <string name="add_to_favorites_desc">Add to favorites</string>
+    <string name="remove">remove</string>
+    <string name="remove_item">Remove item</string>
 </resources>
