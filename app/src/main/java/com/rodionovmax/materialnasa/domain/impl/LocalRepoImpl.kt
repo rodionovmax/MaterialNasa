@@ -47,4 +47,10 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
         }
         return gallery
     }
+
+    override fun removeItemFromGallery(pod: Pod) {
+        GlobalScope.launch(Dispatchers.IO) {
+            localDataSource.deletePodByDate(pod.date)
+        }
+    }
 }

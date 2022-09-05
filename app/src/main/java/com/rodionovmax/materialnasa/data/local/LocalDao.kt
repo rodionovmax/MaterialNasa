@@ -1,9 +1,7 @@
 package com.rodionovmax.materialnasa.data.local
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
+import com.rodionovmax.materialnasa.domain.model.Pod
 
 @Dao
 interface LocalDao {
@@ -16,4 +14,10 @@ interface LocalDao {
 
     @Query("SELECT * FROM favorite_pod WHERE date == :selectedDate")
     fun getPodByDate(selectedDate: String): GalleryPodEntity
+
+    @Delete
+    fun deletePod(galleryEntity: GalleryPodEntity)
+
+    @Query("DELETE FROM favorite_pod WHERE date = :podDate")
+    fun deletePodByDate(podDate: String)
 }

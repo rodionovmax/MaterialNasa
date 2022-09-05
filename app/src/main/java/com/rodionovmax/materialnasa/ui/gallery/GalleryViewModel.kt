@@ -26,4 +26,10 @@ class GalleryViewModel(
         _galleryLiveData.postValue(gallery)
     }
 
+    fun removeFromGallery(pod: Pod) {
+        _progressLiveData.postValue(true)
+        localRepo.removeItemFromGallery(pod)
+        _progressLiveData.postValue(false)
+    }
+
 }

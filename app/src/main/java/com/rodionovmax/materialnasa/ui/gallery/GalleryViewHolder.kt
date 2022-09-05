@@ -10,7 +10,7 @@ import com.rodionovmax.materialnasa.domain.model.Pod
 import java.lang.ref.WeakReference
 
 class GalleryViewHolder(
-    parent: ViewGroup
+    parent: ViewGroup,
 ) : RecyclerView.ViewHolder(
     LayoutInflater.from(parent.context).inflate(R.layout.gallery_item, parent, false)
 ){

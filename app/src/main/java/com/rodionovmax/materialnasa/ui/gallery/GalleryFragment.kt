@@ -17,11 +17,11 @@ import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
 import com.rodionovmax.materialnasa.domain.model.Pod
 
-class GalleryFragment : Fragment() {
+class GalleryFragment : Fragment(), OnDeleteButtonClickedListener {
 
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
-    private val adapter = GalleryAdapter()
+    private val adapter = GalleryAdapter(this)
     private val viewModel by lazy { GalleryViewModel(app.localRepo) }
 
     override fun onCreateView(
@@ -175,4 +175,13 @@ class GalleryFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    override fun removeFromDatabase(pod: Pod) {
+        viewModel.removeFromGallery(pod)
+        Toast.makeText(requireActivity(), "Removed from the gallery", Toast.LENGTH_SHORT).show()
+    }
+}
+
+interface OnDeleteButtonClickedListener {
+    fun removeFromDatabase(pod: Pod)
 }
