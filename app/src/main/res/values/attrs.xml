@@ -2,4 +2,5 @@
 <resources>
     <attr name="chipStrokeColorChecked" format="reference" />
     <attr name="chipStrokeColorUnchecked" format="reference" />
+    <attr name="primaryFontColor" format="reference" />
 </resources>

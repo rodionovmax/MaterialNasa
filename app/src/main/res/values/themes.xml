@@ -11,12 +11,10 @@
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-<!--        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>-->
 
-        <!-- Customize your theme here. -->
         <item name="fontFamily">@font/droid_sans</item>
         <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="primaryFontColor">@color/grey</item>
     </style>
 
     <style name="Theme.MaterialNasa.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
