@@ -16,7 +16,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.databinding.FragmentPodBinding
-import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.data.model.Pod
 
 
 class PodFragment : Fragment() {

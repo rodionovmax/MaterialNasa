@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rodionovmax.materialnasa.domain.model.Pod
-import com.rodionovmax.materialnasa.domain.repo.LocalRepo
-import com.rodionovmax.materialnasa.domain.repo.RemoteRepo
+import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.repo.LocalRepo
+import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.SingleEventLiveData
 import com.rodionovmax.materialnasa.utils.getDateWithOffset
 import kotlinx.coroutines.channels.Channel
@@ -65,7 +65,9 @@ class PodViewModel(
     }
 
     fun savePodToGallery(pod: Pod) {
-        localRepo.addPodToGallery(pod)
+        viewModelScope.launch {
+            localRepo.addPodToGallery(pod)
+        }
     }
 
     private fun isPodSavedInGallery(date: String): Boolean {

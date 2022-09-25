@@ -1,10 +1,10 @@
-package com.rodionovmax.materialnasa.domain.impl
+package com.rodionovmax.materialnasa.data.repo_impl
 
 import com.rodionovmax.materialnasa.BuildConfig
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.network.NasaApiService
-import com.rodionovmax.materialnasa.domain.model.Pod
-import com.rodionovmax.materialnasa.domain.repo.RemoteRepo
+import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.asDomainPod
 import retrofit2.Call
 import retrofit2.Callback

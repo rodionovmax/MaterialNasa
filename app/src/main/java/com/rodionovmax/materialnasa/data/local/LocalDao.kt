@@ -1,7 +1,6 @@
 package com.rodionovmax.materialnasa.data.local
 
 import androidx.room.*
-import com.rodionovmax.materialnasa.domain.model.Pod
 
 @Dao
 interface LocalDao {

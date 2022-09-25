@@ -9,13 +9,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
-import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.data.model.Pod
 
 class GalleryFragment : Fragment(), OnDeleteButtonClickedListener {
 
@@ -64,6 +63,10 @@ class GalleryFragment : Fragment(), OnDeleteButtonClickedListener {
     private fun initViews() {
         viewModel.getGallery()
         initRecyclerView()
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.getGallery()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     private fun initRecyclerView() {

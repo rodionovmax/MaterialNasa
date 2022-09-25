@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.databinding.GalleryItemBinding
-import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.data.model.Pod
 import java.lang.ref.WeakReference
 
 class GalleryViewHolder(

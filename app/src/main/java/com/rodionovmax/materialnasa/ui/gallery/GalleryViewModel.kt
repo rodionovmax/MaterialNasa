@@ -3,9 +3,11 @@ package com.rodionovmax.materialnasa.ui.gallery
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.rodionovmax.materialnasa.domain.model.Pod
-import com.rodionovmax.materialnasa.domain.repo.LocalRepo
+import androidx.lifecycle.viewModelScope
+import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.repo.LocalRepo
 import com.rodionovmax.materialnasa.utils.SingleEventLiveData
+import kotlinx.coroutines.launch
 
 class GalleryViewModel(
     private val localRepo: LocalRepo
@@ -28,7 +30,9 @@ class GalleryViewModel(
 
     fun removeFromGallery(pod: Pod) {
         _progressLiveData.postValue(true)
-        localRepo.removeItemFromGallery(pod)
+        viewModelScope.launch {
+            localRepo.removeItemFromGallery(pod)
+        }
         _progressLiveData.postValue(false)
     }
 

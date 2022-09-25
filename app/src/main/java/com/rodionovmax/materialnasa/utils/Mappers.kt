@@ -2,7 +2,7 @@ package com.rodionovmax.materialnasa.utils
 
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
 import com.rodionovmax.materialnasa.data.network.model.PodDto
-import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.data.model.Pod
 
 fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
     id = null,

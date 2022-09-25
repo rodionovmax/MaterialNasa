@@ -1,6 +1,6 @@
-package com.rodionovmax.materialnasa.domain.repo
+package com.rodionovmax.materialnasa.data.repo
 
-import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.data.model.Pod
 
 interface RemoteRepo {
 

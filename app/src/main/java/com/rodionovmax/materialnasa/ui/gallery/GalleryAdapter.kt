@@ -2,7 +2,7 @@ package com.rodionovmax.materialnasa.ui.gallery
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.rodionovmax.materialnasa.domain.model.Pod
+import com.rodionovmax.materialnasa.data.model.Pod
 
 class GalleryAdapter(
     private val listener: OnDeleteButtonClickedListener?
