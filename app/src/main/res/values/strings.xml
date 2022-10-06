@@ -22,5 +22,9 @@
     <string name="remove_item">Remove item</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="mars_fragment_title">Photos from Mars rover</string>
+    <string name="mars_fragment_choose_camera">Choose camera</string>
+    <string name="date">mm/dd/yyyy</string>
+    <string name="picture_from_mars">Picture from Mars</string>
 
 </resources>

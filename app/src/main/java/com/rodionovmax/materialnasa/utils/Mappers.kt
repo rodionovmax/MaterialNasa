@@ -1,8 +1,12 @@
 package com.rodionovmax.materialnasa.utils
 
+import androidx.lifecycle.Transformations.map
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
+import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.network.model.MarsPhotoDto
+import com.rodionovmax.materialnasa.data.network.model.MarsResultsDto
 
 fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
     id = null,
@@ -35,6 +39,23 @@ fun GalleryPodEntity.asDomainPod() = Pod(
     url = imgUrl,
     isSaved = isSaved
 )
+
+fun asDomainMarsPhotos(marsResultsDto: MarsResultsDto): List<MarsPhoto> {
+    return marsResultsDto.results.map {
+        MarsPhoto(
+            id = it.id,
+            sol = it.sol,
+            cameraId = it.camera.id,
+            cameraName = it.camera.cameraName,
+            roverId = it.rover.id,
+            imgSrc = it.imageSrc,
+            earthDate = it.earthDate
+        )
+    }
+}
+
+
+
 
 
 /*

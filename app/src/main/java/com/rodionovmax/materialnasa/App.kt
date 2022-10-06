@@ -8,10 +8,12 @@ import com.rodionovmax.materialnasa.data.repo_impl.LocalRepoImpl
 import com.rodionovmax.materialnasa.data.repo.LocalRepo
 import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.data.repo_impl.RemoteRepoImpl
+import com.rodionovmax.materialnasa.domain.FetchMarsPhotosUseCase
 
 class App : Application() {
     val remoteRepo: RemoteRepo by lazy { RemoteRepoImpl() }
     val localRepo: LocalRepo by lazy { LocalRepoImpl(getDb().localDao) }
+    val fetchMarsPhotosUseCase: FetchMarsPhotosUseCase by lazy { FetchMarsPhotosUseCase(remoteRepo) }
     private lateinit var appInstance: App
 
     override fun onCreate() {

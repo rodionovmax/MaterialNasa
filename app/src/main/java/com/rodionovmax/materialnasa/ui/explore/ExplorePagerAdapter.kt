@@ -12,7 +12,7 @@ const val WEATHER_FRAGMENT = 2
 
 class ExplorePagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
-    private val fragments = arrayListOf(EarthFragment(), MarsFragment(), WeatherFragment())
+    private val fragments = arrayListOf(MarsFragment(), EarthFragment(), WeatherFragment())
 
     override fun getItemCount(): Int {
         return fragments.size
