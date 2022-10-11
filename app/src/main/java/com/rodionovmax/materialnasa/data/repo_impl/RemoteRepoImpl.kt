@@ -11,7 +11,6 @@ import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.asDomainMarsPhotos
 import com.rodionovmax.materialnasa.utils.asDomainPod
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
@@ -53,17 +52,22 @@ class RemoteRepoImpl : RemoteRepo {
         })
     }
 
-    override suspend fun getPhotosFromMars(
+    override suspend fun getPhotosForCamera(
         camera: String,
         earthDate: String
     ): Result<List<MarsPhoto>> = getResult {
-
         withContext(Dispatchers.IO) {
-            val response = api.getMarsPhotos(ROVER, apiKey, camera, earthDate)
+            val response = api.getRoverPhotosForCamera(ROVER, apiKey, camera, earthDate)
             asDomainMarsPhotos(response)
         }
     }
 
+    override suspend fun getAllPhotos(earthDate: String): Result<List<MarsPhoto>> = getResult {
+        withContext(Dispatchers.IO) {
+            val response = api.getAllRoverPhotos(ROVER, apiKey, earthDate)
+            asDomainMarsPhotos(response)
+        }
+    }
 
 }
 

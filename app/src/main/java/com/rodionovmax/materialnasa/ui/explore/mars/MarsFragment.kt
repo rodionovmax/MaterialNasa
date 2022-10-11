@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
 import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.databinding.FragmentMarsBinding
@@ -41,7 +42,7 @@ class MarsFragment : Fragment() {
     ): View {
         _binding = FragmentMarsBinding.inflate(inflater, container, false)
 
-        initViews()
+        initViews(savedInstanceState)
         observeViewModel()
 
         return binding.root
@@ -61,9 +62,9 @@ class MarsFragment : Fragment() {
         selectedDate = viewModel.dateState.value
     }
 
-    private fun initViews() {
+    private fun initViews(savedInstanceState: Bundle?) {
         initRecyclerView()
-        selectCamera()
+        selectCamera(savedInstanceState)
         selectDate()
     }
 
@@ -79,7 +80,7 @@ class MarsFragment : Fragment() {
         binding.tvCamera.setAdapter(camerasArrayAdapter)
     }
 
-    private fun selectCamera() {
+    private fun selectCamera(savedInstanceState: Bundle?) {
         binding.tvCamera.setOnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
             when (position) {
                 0 -> camera = "ALL"
@@ -96,12 +97,13 @@ class MarsFragment : Fragment() {
             }
             camera?.let { viewModel.setCamera(it) }
             onCameraSelected()
+
+            if (savedInstanceState != null) {
+                if (viewModel.cameraState.value != "") {
+                    viewModel.triggerToast(MarsViewModel.ToastEvent.CAMERA_SELECTED)
+                }
+            }
         }
-        Toast.makeText(
-            requireContext(),
-            "${viewModel.cameraState.value} was selected",
-            Toast.LENGTH_SHORT
-        ).show()
     }
 
     private fun selectDate() {
@@ -127,6 +129,8 @@ class MarsFragment : Fragment() {
             selectedDate = outputDateFormat.format(it)
 
             selectedDate?.let { date -> viewModel.setDate(date) }
+
+            onDateSelected()
         }
         materialDatePicker.show(childFragmentManager, "tag")
     }
@@ -140,14 +144,27 @@ class MarsFragment : Fragment() {
     }
 
     private fun onCameraSelected() {
-        if (selectedDate == null) {
-            Toast.makeText(requireContext(), "Select date first!", Toast.LENGTH_SHORT).show()
+        if (selectedDate == null || selectedDate == "") {
+            viewModel.triggerToast(MarsViewModel.ToastEvent.SELECT_DATE)
         } else {
-            camera?.let { camera -> fetchPhotosFromMars() }
+            camera?.let { fetchPhotosFromMars() }
+        }
+    }
+
+    private fun onDateSelected() {
+        if (camera == null || camera == "") {
+            viewModel.triggerToast(MarsViewModel.ToastEvent.SELECT_CAMERA)
+        } else {
+            selectedDate?.let { fetchPhotosFromMars() }
         }
     }
 
     private fun observeViewModel() {
+        renderUiState()
+        renderToast()
+    }
+
+    private fun renderUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collectLatest { state ->
@@ -180,6 +197,18 @@ class MarsFragment : Fragment() {
         }
     }
 
-
+    private fun renderToast() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.toastEventFlow.collect { event ->
+                    when (event) {
+                        is MarsViewModel.ToastState.CameraSelected -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                        is MarsViewModel.ToastState.SelectCamera -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                        is MarsViewModel.ToastState.SelectDate -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
 }
 

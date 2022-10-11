@@ -76,13 +76,13 @@ class PodViewModel(
     }
 
     sealed class PodEvent() {
-        data class ToastEvent(val message: String): PodEvent()
+        data class PodToast(val message: String): PodEvent()
     }
 
     private val eventChannel = Channel<PodEvent>()
     val eventFlow = eventChannel.receiveAsFlow()
 
     fun triggerEvent(chipName: String) = viewModelScope.launch {
-        eventChannel.send(PodEvent.ToastEvent("$chipName was selected"))
+        eventChannel.send(PodEvent.PodToast("$chipName was selected"))
     }
 }

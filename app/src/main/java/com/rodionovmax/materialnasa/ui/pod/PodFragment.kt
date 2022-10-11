@@ -56,7 +56,7 @@ class PodFragment : Fragment() {
         lifecycleScope.launchWhenStarted {
             viewModel.eventFlow.collect { event ->
                 when(event) {
-                    is PodViewModel.PodEvent.ToastEvent -> {
+                    is PodViewModel.PodEvent.PodToast -> {
                         Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
                     }
                 }

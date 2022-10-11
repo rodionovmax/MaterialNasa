@@ -15,10 +15,17 @@ interface NasaApiService {
     ) : Call<PodDto>
 
     @GET("mars-photos/api/v1/rovers/{rover}/photos")
-    suspend fun getMarsPhotos(
+    suspend fun getRoverPhotosForCamera(
         @Path("rover") rover: String,
         @Query("api_key") apiKey: String,
         @Query("camera") camera: String,
+        @Query("earth_date") earthDate: String,
+    ) : MarsResultsDto
+
+    @GET("mars-photos/api/v1/rovers/{rover}/photos")
+    suspend fun getAllRoverPhotos(
+        @Path("rover") rover: String,
+        @Query("api_key") apiKey: String,
         @Query("earth_date") earthDate: String,
     ) : MarsResultsDto
 }

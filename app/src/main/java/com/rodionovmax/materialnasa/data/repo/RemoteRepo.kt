@@ -12,8 +12,12 @@ interface RemoteRepo {
         onError: ((Throwable) -> Unit)? = null
     )
 
-    suspend fun getPhotosFromMars(
+    suspend fun getPhotosForCamera(
         camera: String,
+        earthDate: String
+    ): Result<List<MarsPhoto>>
+
+    suspend fun getAllPhotos(
         earthDate: String
     ): Result<List<MarsPhoto>>
 }
