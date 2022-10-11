@@ -10,6 +10,9 @@ import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.asDomainMarsPhotos
 import com.rodionovmax.materialnasa.utils.asDomainPod
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,7 +31,11 @@ class RemoteRepoImpl : RemoteRepo {
     private val api: NasaApiService = retrofit.create(NasaApiService::class.java)
     private val apiKey = BuildConfig.NASA_API_KEY
 
-    override fun getPictureOfTheDay(date: String, onSuccess: (Pod) -> Unit, onError: ((Throwable) -> Unit)?) {
+    override fun getPictureOfTheDay(
+        date: String,
+        onSuccess: (Pod) -> Unit,
+        onError: ((Throwable) -> Unit)?
+    ) {
         api.getPod(apiKey, date).enqueue(object : Callback<PodDto> {
             override fun onResponse(call: Call<PodDto>, response: Response<PodDto>) {
                 val body = response.body()
@@ -46,11 +53,16 @@ class RemoteRepoImpl : RemoteRepo {
         })
     }
 
-    override suspend fun getPhotosFromMars(camera: String, earthDate: String): Result<List<MarsPhoto>> = getResult {
-        val response = api.getMarsPhotos(ROVER, apiKey, camera, earthDate)
-        asDomainMarsPhotos(response)
-    }
+    override suspend fun getPhotosFromMars(
+        camera: String,
+        earthDate: String
+    ): Result<List<MarsPhoto>> = getResult {
 
+        withContext(Dispatchers.IO) {
+            val response = api.getMarsPhotos(ROVER, apiKey, camera, earthDate)
+            asDomainMarsPhotos(response)
+        }
+    }
 
 
 }

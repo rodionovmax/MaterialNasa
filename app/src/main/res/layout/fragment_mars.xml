@@ -70,12 +70,12 @@
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/calendar_dropdown"
+        app:layout_constraintTop_toBottomOf="@id/camera_dropdown"
         app:spanCount="2"
         tools:listitem="@layout/mars_photo_item" />
 
     <FrameLayout
-        android:id="@+id/mars_fragment_loading_layout"
+        android:id="@+id/mars_fragment_loader"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"

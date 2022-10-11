@@ -1,24 +1,26 @@
 package com.rodionovmax.materialnasa.ui.explore.mars
 
-import android.app.DatePickerDialog
-import android.graphics.Camera
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.databinding.FragmentMarsBinding
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +31,7 @@ class MarsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val adapter = MarsAdapter()
-    private val viewModel by lazy { MarsViewModel(app.fetchMarsPhotosUseCase) }
+    val viewModel: MarsViewModel by viewModels { MarsViewModelFactory(this, app.fetchMarsPhotosUseCase) }
     private var camera: String? = null
     private var selectedDate: String? = null
 
@@ -50,15 +52,19 @@ class MarsFragment : Fragment() {
         _binding = null
     }
 
-    private fun initViews() {
-        initRecyclerView()
+    override fun onResume() {
+        super.onResume()
+        // to keep exposed dropdown menu after screen rotation
         setListOfCameras()
-        selectCamera()
-        selectDate()
+        // restore camera and date after fragment recreated
+        camera = viewModel.cameraState.value
+        selectedDate = viewModel.dateState.value
     }
 
-    private fun observeViewModel() {
-
+    private fun initViews() {
+        initRecyclerView()
+        selectCamera()
+        selectDate()
     }
 
     private fun initRecyclerView() {
@@ -88,9 +94,14 @@ class MarsFragment : Fragment() {
                 9 -> camera = "MINITES"
                 else -> throw ArrayIndexOutOfBoundsException("Index of the camera clicked in the dropdown is out of bound")
             }
-            viewModel.selectCamera(camera!!)
+            camera?.let { viewModel.setCamera(it) }
+            onCameraSelected()
         }
-        Toast.makeText(requireContext(), "$camera was selected", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            requireContext(),
+            "${viewModel.cameraState.value} was selected",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun selectDate() {
@@ -114,21 +125,61 @@ class MarsFragment : Fragment() {
         materialDatePicker.addOnPositiveButtonClickListener {
             binding.calendarDropdown.editText?.setText(materialDatePicker.headerText)
             selectedDate = outputDateFormat.format(it)
+
+            selectedDate?.let { date -> viewModel.setDate(date) }
         }
         materialDatePicker.show(childFragmentManager, "tag")
     }
 
-    private val outputDateFormat = SimpleDateFormat("yyyy-mm-dd", Locale.getDefault()).apply {
+    private val outputDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
 
-    private fun fetchPhotosFromMars(camera: String, date: String) {
-        viewModel.fetchMarsPhotos(camera, date)
+    private fun fetchPhotosFromMars() {
+        viewModel.fetchMarsPhotos()
     }
 
-    fun onCameraSelected() {
+    private fun onCameraSelected() {
+        if (selectedDate == null) {
+            Toast.makeText(requireContext(), "Select date first!", Toast.LENGTH_SHORT).show()
+        } else {
+            camera?.let { camera -> fetchPhotosFromMars() }
+        }
+    }
 
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collectLatest { state ->
+                    when (state) {
+                        is MarsUiState.Empty -> {
+                            binding.marsFragmentLoader.visibility = View.GONE
+                            binding.marsRecyclerview.visibility = View.GONE
+                        }
+                        is MarsUiState.Success -> {
+                            binding.marsFragmentLoader.visibility = View.GONE
+                            binding.marsRecyclerview.visibility = View.VISIBLE
+                            adapter.setData(state.data)
+                        }
+                        is MarsUiState.Error -> {
+                            binding.marsFragmentLoader.visibility = View.GONE
+                            binding.marsRecyclerview.visibility = View.GONE
+                            Toast.makeText(
+                                requireActivity(),
+                                state.error.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        is MarsUiState.Loading -> {
+                            binding.marsFragmentLoader.visibility = View.VISIBLE
+                            binding.marsRecyclerview.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
 }
+
