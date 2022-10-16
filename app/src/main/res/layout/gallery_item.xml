@@ -11,12 +11,25 @@
         android:id="@+id/gallery_item_image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:contentDescription="@string/gallery_image_desc"
+        app:contentDescription="@string/gallery_image_desc"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <ImageButton
+        android:id="@+id/drag_handle_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        app:tint="@color/light_grey"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="@+id/gallery_item_image"
+        app:layout_constraintTop_toTopOf="@+id/gallery_item_image"
+        app:srcCompat="@drawable/ic_hamburger_menu"
+        android:contentDescription="@string/drag_handle" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/gallery_item_title"

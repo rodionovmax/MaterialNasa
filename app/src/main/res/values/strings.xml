@@ -26,5 +26,6 @@
     <string name="mars_fragment_choose_camera">Choose camera</string>
     <string name="date">mm/dd/yyyy</string>
     <string name="picture_from_mars">Picture from Mars</string>
+    <string name="drag_handle">Drag handle</string>
 
 </resources>
