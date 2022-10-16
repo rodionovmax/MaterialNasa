@@ -17,6 +17,7 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
             if (pod.date !in dates) {
                 pod.isSaved = true
                 localDataSource.addToPodGallery(pod.asEntity())
+                localDataSource.incrementGalleryPosition()
             }
         }
     }
@@ -47,6 +48,7 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
 
     override suspend fun removeItemFromGallery(pod: Pod) {
         withContext(Dispatchers.IO) {
+            localDataSource.updateItemPositionsInGalleryWhenDeletingPicture(pod.date)
             localDataSource.deletePodByDate(pod.date)
         }
     }

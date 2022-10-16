@@ -15,7 +15,8 @@ class GalleryAdapter(
         setHasStableIds(true)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder = GalleryViewHolder(parent)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder =
+        GalleryViewHolder(parent)
 
     override fun onBindViewHolder(holder: GalleryViewHolder, position: Int) {
         holder.bind(gallery[position], dragListener)

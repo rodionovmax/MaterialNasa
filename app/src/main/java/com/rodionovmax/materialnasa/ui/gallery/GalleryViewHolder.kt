@@ -1,8 +1,8 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.ViewGroup
+import android.annotation.SuppressLint
+import android.view.*
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rodionovmax.materialnasa.R
@@ -17,6 +17,7 @@ class GalleryViewHolder(
 ){
     private val binding = GalleryItemBinding.bind(itemView)
 
+    @SuppressLint("ClickableViewAccessibility")
     fun bind(galleryItem: Pod, dragListener: OnStartDragListener) {
         Glide.with(itemView.context).load(galleryItem.url).into(binding.galleryItemImage)
         binding.galleryItemTitle.text = galleryItem.title

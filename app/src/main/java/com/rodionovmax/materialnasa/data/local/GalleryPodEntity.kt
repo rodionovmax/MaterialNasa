@@ -11,5 +11,6 @@ data class GalleryPodEntity(
     val description: String,
     val copyright: String?,
     val date: String,
-    val isSaved: Boolean
+    val isSaved: Boolean,
+    val position: Int?
 )

@@ -15,7 +15,8 @@ fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
     description = description,
     copyright = copyright,
     date = date,
-    isSaved = isSaved
+    isSaved = isSaved,
+    position = 0
 )
 
 fun PodDto.asDomainPod() = Pod(
