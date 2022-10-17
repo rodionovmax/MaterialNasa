@@ -8,4 +8,5 @@ interface LocalRepo {
     fun getPodByDate(date: String): Pod?
     fun getAllFromGallery(): List<Pod>
     suspend fun removeItemFromGallery(pod: Pod)
+    suspend fun updateGalleryItemPositions(posFrom: Int, posTo: Int, currentItem: Pod)
 }

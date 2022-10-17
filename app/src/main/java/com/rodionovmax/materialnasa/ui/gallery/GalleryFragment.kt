@@ -23,15 +23,20 @@ class GalleryFragment : Fragment() {
 
     private val adapter: GalleryAdapter by lazy {
         GalleryAdapter(
-            object : OnDeleteButtonClickedListener {
+            object : GalleryListeners.OnDeleteButtonClickedListener {
                 override fun removeFromDatabase(pod: Pod) {
                     viewModel.removeFromGallery(pod)
                     Toast.makeText(requireActivity(), "Removed from the gallery", Toast.LENGTH_SHORT).show()
                 }
             },
-            object : OnStartDragListener {
+            object : GalleryListeners.OnStartDragListener {
                 override fun onStartDrag(viewHolder: RecyclerView.ViewHolder) {
                     itemTouchHelper.startDrag(viewHolder)
+                }
+            },
+            object : GalleryListeners.OnPositionsChangedListener {
+                override fun updatePositionsInDb(posFrom: Int, posTo: Int, pod: Pod) {
+                    viewModel.updateGalleryItemPositionsInDb(posFrom, posTo, pod)
                 }
             }
         )

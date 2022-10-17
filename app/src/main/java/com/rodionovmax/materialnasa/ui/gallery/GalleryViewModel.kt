@@ -36,4 +36,10 @@ class GalleryViewModel(
         _progressLiveData.postValue(false)
     }
 
+    fun updateGalleryItemPositionsInDb(posFrom: Int, posTo: Int, currentItem: Pod) {
+        viewModelScope.launch {
+            localRepo.updateGalleryItemPositions(posFrom, posTo, currentItem)
+        }
+    }
+
 }

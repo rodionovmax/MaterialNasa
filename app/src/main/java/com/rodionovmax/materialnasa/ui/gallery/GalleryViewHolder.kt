@@ -18,7 +18,7 @@ class GalleryViewHolder(
     private val binding = GalleryItemBinding.bind(itemView)
 
     @SuppressLint("ClickableViewAccessibility")
-    fun bind(galleryItem: Pod, dragListener: OnStartDragListener) {
+    fun bind(galleryItem: Pod, dragListener: GalleryListeners.OnStartDragListener) {
         Glide.with(itemView.context).load(galleryItem.url).into(binding.galleryItemImage)
         binding.galleryItemTitle.text = galleryItem.title
         galleryItem.copyright?.let {

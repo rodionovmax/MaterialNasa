@@ -16,8 +16,9 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
             val dates = gallery.map { it.date }
             if (pod.date !in dates) {
                 pod.isSaved = true
+                localDataSource.incrementGalleryPositions()
                 localDataSource.addToPodGallery(pod.asEntity())
-                localDataSource.incrementGalleryPosition()
+
             }
         }
     }
@@ -27,7 +28,7 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
         runBlocking {
             launch(Dispatchers.Default) {
                 withContext(Dispatchers.IO) {
-                     pod = localDataSource.getPodByDate(date)
+                    pod = localDataSource.getPodByDate(date)
                 }
             }
         }
@@ -50,6 +51,18 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
         withContext(Dispatchers.IO) {
             localDataSource.updateItemPositionsInGalleryWhenDeletingPicture(pod.date)
             localDataSource.deletePodByDate(pod.date)
+        }
+    }
+
+    override suspend fun updateGalleryItemPositions(posFrom: Int, posTo: Int, currentItem: Pod) {
+        withContext(Dispatchers.IO) {
+            if (posFrom < posTo) {
+                localDataSource.adjustPositionsIfMovedDown(posFrom, posTo)
+                localDataSource.updatePositionOfMovedItem(posTo, currentItem.date)
+            } else {
+                localDataSource.adjustPositionsIfMovedUp(posFrom, posTo)
+                localDataSource.updatePositionOfMovedItem(posTo, currentItem.date)
+            }
         }
     }
 }

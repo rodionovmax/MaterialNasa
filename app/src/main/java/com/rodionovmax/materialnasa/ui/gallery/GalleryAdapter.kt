@@ -5,8 +5,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rodionovmax.materialnasa.data.model.Pod
 
 class GalleryAdapter(
-    private val deleteButtonClickedListener: OnDeleteButtonClickedListener?,
-    private val dragListener: OnStartDragListener
+    private val deleteButtonClickedListener: GalleryListeners.OnDeleteButtonClickedListener?,
+    private val dragListener: GalleryListeners.OnStartDragListener,
+    private val positionsListener: GalleryListeners.OnPositionsChangedListener
 ) : RecyclerView.Adapter<GalleryViewHolder>(), ItemTouchHelperAdapter {
 
     private var gallery = mutableListOf<Pod>()
@@ -53,6 +54,7 @@ class GalleryAdapter(
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         gallery.removeAt(fromPosition).apply {
             gallery.add(toPosition, this)
+            positionsListener.updatePositionsInDb(fromPosition, toPosition, this)
         }
         notifyItemMoved(fromPosition, toPosition)
     }
