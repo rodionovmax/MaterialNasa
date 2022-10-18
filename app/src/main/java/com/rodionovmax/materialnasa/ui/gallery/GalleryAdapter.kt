@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.rodionovmax.materialnasa.data.model.Pod
 
@@ -32,11 +33,23 @@ class GalleryAdapter(
 
     override fun getItemCount(): Int = gallery.size
 
-    fun setData(list: List<Pod>) {
+    fun setData(data: List<Pod>) {
+//        this.data = data.toMutableList()
         gallery.clear()
-        gallery.addAll(list)
+        gallery.addAll(data)
         notifyDataSetChanged()
     }
+
+    // function to implement DiffUtil
+    // the problem here is that idk how to get data from viewmodel when adapter is initialized
+    // when fragment calls adapter viewmodel is not initialized
+    /*fun setNewData(newData: List<Pod>) {
+        val diffCallback = GalleryDiffUtilCallback(data, newData)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        diffResult.dispatchUpdatesTo(this)
+        gallery.clear()
+        gallery.addAll(newData)
+    }*/
 
     private fun removeItem(viewHolder: RecyclerView.ViewHolder): Pod {
 

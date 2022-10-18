@@ -74,6 +74,7 @@ class GalleryFragment : Fragment() {
 
     private fun showGallery(gallery: List<Pod>) {
         adapter.setData(gallery)
+//        adapter.setNewData(gallery)
     }
 
     private fun showError(error: Throwable) {
