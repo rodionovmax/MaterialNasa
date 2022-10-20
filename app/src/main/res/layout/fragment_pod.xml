@@ -84,12 +84,23 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/pod_picture_title"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 tools:text = "Picture of the day title"
+                android:layout_marginTop="12dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pod_image"
+                app:layout_constraintEnd_toStartOf="@+id/highlight_text_switch"
                 style="@style/TextTitle" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/highlight_text_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/highlight"
+                app:layout_constraintEnd_toEndOf="@id/pod_image"
+                app:layout_constraintTop_toBottomOf="@id/pod_image" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/pod_picture_description"

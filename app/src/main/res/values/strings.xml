@@ -27,5 +27,6 @@
     <string name="date">mm/dd/yyyy</string>
     <string name="picture_from_mars">Picture from Mars</string>
     <string name="drag_handle">Drag handle</string>
+    <string name="highlight">Light</string>
 
 </resources>
