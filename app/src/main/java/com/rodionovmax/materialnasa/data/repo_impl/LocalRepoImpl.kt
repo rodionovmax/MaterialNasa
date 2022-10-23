@@ -1,14 +1,22 @@
 package com.rodionovmax.materialnasa.data.repo_impl
 
+import com.rodionovmax.materialnasa.data.Result
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
 import com.rodionovmax.materialnasa.data.local.LocalDao
+import com.rodionovmax.materialnasa.data.local.RoverGalleryDao
+import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
+import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.data.repo.LocalRepo
 import com.rodionovmax.materialnasa.utils.asDomainPod
 import com.rodionovmax.materialnasa.utils.asEntity
+import com.rodionovmax.materialnasa.utils.asEntityRoverPhotos
 import kotlinx.coroutines.*
 
-class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
+class LocalRepoImpl(
+    private val localDataSource: LocalDao,
+    private val roverDataSource: RoverGalleryDao
+) : LocalRepo {
 
     override suspend fun addPodToGallery(pod: Pod) {
         withContext(Dispatchers.IO) {
@@ -64,5 +72,18 @@ class LocalRepoImpl(private val localDataSource: LocalDao) : LocalRepo {
                 localDataSource.updatePositionOfMovedItem(posTo, currentItem.date)
             }
         }
+    }
+
+    override suspend fun saveRoverPhotosToDb(photos: List<MarsPhoto>) {
+        val dbPhotos = asEntityRoverPhotos(photos)
+        roverDataSource.insertRoverPhotos(dbPhotos)
+    }
+
+    override suspend fun getRoverImage(adapterPosition: Int): RoverPhotoEntity {
+        return roverDataSource.getRoverPhoto(adapterPosition)
+    }
+
+    override suspend fun cleanRoverGalleryTable() {
+        roverDataSource.deleteAll()
     }
 }

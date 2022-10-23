@@ -14,3 +14,10 @@ data class GalleryPodEntity(
     val isSaved: Boolean,
     val position: Int?
 )
+
+@Entity(tableName = "rover_photos")
+data class RoverPhotoEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int?,
+    val camera: String,
+    val earthDate: String
+)

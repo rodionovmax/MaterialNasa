@@ -2,6 +2,7 @@ package com.rodionovmax.materialnasa.utils
 
 import androidx.lifecycle.Transformations.map
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
+import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.model.Pod
@@ -55,7 +56,15 @@ fun asDomainMarsPhotos(marsResultsDto: MarsResultsDto): List<MarsPhoto> {
     }
 }
 
-
+fun asEntityRoverPhotos(marsPhotos: List<MarsPhoto>): List<RoverPhotoEntity> {
+    return marsPhotos.map {
+        RoverPhotoEntity(
+            id = null,
+            camera = it.cameraName,
+            earthDate = it.earthDate
+        )
+    }
+}
 
 
 

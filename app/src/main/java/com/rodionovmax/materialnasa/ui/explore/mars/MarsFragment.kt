@@ -19,7 +19,9 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.app
+import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.databinding.FragmentMarsBinding
+import com.rodionovmax.materialnasa.ui.explore.picture.PictureFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -31,8 +33,16 @@ class MarsFragment : Fragment() {
     private var _binding: FragmentMarsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = MarsAdapter()
-    val viewModel: MarsViewModel by viewModels { MarsViewModelFactory(this, app.fetchMarsPhotosUseCase) }
+    private val adapter = MarsAdapter {
+        viewModel.onRoverPhotoClicked(it)
+    }
+
+    val viewModel: MarsViewModel by viewModels {
+        MarsViewModelFactory(
+            this,
+            app.fetchMarsPhotosUseCase
+        )
+    }
     private var camera: String? = null
     private var selectedDate: String? = null
 
@@ -162,6 +172,22 @@ class MarsFragment : Fragment() {
     private fun observeViewModel() {
         renderUiState()
         renderToast()
+        observeClickOnRoverPhoto()
+    }
+
+    private fun observeClickOnRoverPhoto() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.roverPhoto.collectLatest {
+                    // fix this patch
+                    if (it.id != 0) {
+                        activity?.supportFragmentManager?.apply {
+                            openPictureFragment(it)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun renderUiState() {
@@ -202,12 +228,38 @@ class MarsFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.toastEventFlow.collect { event ->
                     when (event) {
-                        is MarsViewModel.ToastState.CameraSelected -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
-                        is MarsViewModel.ToastState.SelectCamera -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
-                        is MarsViewModel.ToastState.SelectDate -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                        is MarsViewModel.ToastState.CameraSelected -> Toast.makeText(
+                            requireContext(),
+                            event.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        is MarsViewModel.ToastState.SelectCamera -> Toast.makeText(
+                            requireContext(),
+                            event.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        is MarsViewModel.ToastState.SelectDate -> Toast.makeText(
+                            requireContext(),
+                            event.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
+        }
+    }
+
+    private fun openPictureFragment(marsPhoto: MarsPhoto) {
+        activity?.supportFragmentManager?.apply {
+            beginTransaction()
+                .add(
+                    R.id.container,
+                    PictureFragment.newInstance(Bundle().apply {
+                        putParcelable(PictureFragment.BUNDLE_PICTURE, marsPhoto)
+                    })
+                )
+                .addToBackStack("")
+                .commitAllowingStateLoss()
         }
     }
 }

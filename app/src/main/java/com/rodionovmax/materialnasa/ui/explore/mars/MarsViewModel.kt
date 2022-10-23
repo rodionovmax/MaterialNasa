@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodionovmax.materialnasa.data.Result
+import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.domain.FetchMarsPhotosUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +31,11 @@ class MarsViewModel(
     private val _dateState: MutableStateFlow<String> = MutableStateFlow("")
     val dateState: StateFlow<String> = _dateState.asStateFlow()
 
+    private val _roverPhoto: MutableStateFlow<MarsPhoto> = MutableStateFlow(
+        MarsPhoto(0, 0, 0, "", 0, "", "") // update
+    )
+    val roverPhoto: StateFlow<MarsPhoto> = _roverPhoto.asStateFlow()
+
     init {
         savedStateHandle.get<String>(STATE_CAMERA)?.let { cam ->
             setCamera(cam)
@@ -42,10 +49,23 @@ class MarsViewModel(
         _uiState.value = MarsUiState.Loading
         viewModelScope.launch {
             _uiState.value = when (val result = fetchMarsPhotosUseCase(_cameraState.value, _dateState.value)) {
-                is Result.Success -> MarsUiState.Success(data = result.data)
+                is Result.Success -> MarsUiState.Success(data = result.data).also {
+                    saveMarsPhotosToDb(result.data)
+                }
                 is Result.Error -> MarsUiState.Error(Throwable(result.throwable))
             }
         }
+    }
+
+    private suspend fun saveMarsPhotosToDb(photos: List<MarsPhoto>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            fetchMarsPhotosUseCase.cleanRoverGalleryTable()
+            fetchMarsPhotosUseCase.savePhotosToDb(photos)
+        }
+    }
+
+    fun onRoverPhotoClicked(photo: MarsPhoto) {
+        _roverPhoto.value = photo
     }
 
     fun setCamera(camera: String) {

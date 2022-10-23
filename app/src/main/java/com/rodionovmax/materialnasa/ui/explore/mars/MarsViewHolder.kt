@@ -9,13 +9,19 @@ import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.databinding.MarsPhotoItemBinding
 
-class MarsViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
+class MarsViewHolder(
+    parent: ViewGroup,
+    private val onPhotoClickListener: (photo: MarsPhoto) -> Unit
+) : RecyclerView.ViewHolder(
     LayoutInflater.from(parent.context).inflate(R.layout.mars_photo_item, parent, false)
 ) {
     private val binding = MarsPhotoItemBinding.bind(itemView)
 
     fun bind(marsPhoto: MarsPhoto) {
         Glide.with(itemView.context).load(marsPhoto.imgSrc).into(binding.marsRoverPhoto)
+        itemView.setOnClickListener {
+            onPhotoClickListener.invoke(marsPhoto)
+        }
     }
 }
 

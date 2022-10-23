@@ -6,12 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [GalleryPodEntity::class],
+    entities = [GalleryPodEntity::class, RoverPhotoEntity::class],
     version = 1,
     exportSchema = false
 )
 abstract class LocalDatabase : RoomDatabase() {
     abstract val localDao: LocalDao
+    abstract val roverGalleryDao: RoverGalleryDao
 
     companion object {
         private const val DB_NAME = "nasa.db"
