@@ -31,10 +31,8 @@ class MarsViewModel(
     private val _dateState: MutableStateFlow<String> = MutableStateFlow("")
     val dateState: StateFlow<String> = _dateState.asStateFlow()
 
-    private val _roverPhoto: MutableStateFlow<MarsPhoto> = MutableStateFlow(
-        MarsPhoto(0, 0, 0, "", 0, "", "") // update
-    )
-    val roverPhoto: StateFlow<MarsPhoto> = _roverPhoto.asStateFlow()
+    private val _roverPhoto: MutableStateFlow<MarsPhoto?> = MutableStateFlow(null)
+    val roverPhoto: StateFlow<MarsPhoto?> = _roverPhoto.asStateFlow()
 
     init {
         savedStateHandle.get<String>(STATE_CAMERA)?.let { cam ->

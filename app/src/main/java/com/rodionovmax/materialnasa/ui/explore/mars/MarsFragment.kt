@@ -179,8 +179,7 @@ class MarsFragment : Fragment() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.roverPhoto.collectLatest {
-                    // fix this patch
-                    if (it.id != 0) {
+                    it?.let {
                         activity?.supportFragmentManager?.apply {
                             openPictureFragment(it)
                         }
