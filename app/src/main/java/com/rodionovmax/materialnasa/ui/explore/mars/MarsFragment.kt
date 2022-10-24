@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
@@ -180,9 +181,13 @@ class MarsFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.roverPhoto.collectLatest {
                     it?.let {
-                        activity?.supportFragmentManager?.apply {
-                            openPictureFragment(it)
+//                        activity?.supportFragmentManager?.apply {
+//                            openPictureFragment(it)
+//                        }
+                        val photoBundle = Bundle().apply {
+                            putParcelable(PictureFragment.BUNDLE_PICTURE, it)
                         }
+                        findNavController().navigate(R.id.action_exploreFragment_to_roverPhotoFragment, photoBundle, null)
                     }
                 }
             }
@@ -248,6 +253,7 @@ class MarsFragment : Fragment() {
         }
     }
 
+    // open fragment. replaced by nav controller
     private fun openPictureFragment(marsPhoto: MarsPhoto) {
         activity?.supportFragmentManager?.apply {
             beginTransaction()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MaterialNasa" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.MaterialNasa" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_700</item>
         <item name="colorPrimaryVariant">@color/grey</item>

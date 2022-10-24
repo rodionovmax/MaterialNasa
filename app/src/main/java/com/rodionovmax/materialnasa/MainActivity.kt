@@ -1,31 +1,65 @@
 package com.rodionovmax.materialnasa
 
-import android.animation.ObjectAnimator
-import android.os.Build
 import android.os.Bundle
-import android.os.CountDownTimer
-import android.view.View
-import android.view.ViewTreeObserver
-import android.view.animation.AnticipateInterpolator
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.ActionBar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.animation.doOnEnd
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.navigation.NavigationView
 import com.rodionovmax.materialnasa.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var appBarConfiguration : AppBarConfiguration
 
-//    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val toolbar = binding.toolbar
+        setSupportActionBar(toolbar)
+
+        val host: NavHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment? ?: return
+
+        val navController = host.navController
+
+        appBarConfiguration = AppBarConfiguration(navController.graph)
+
+        setupActionBar(navController, appBarConfiguration)
+        setupBottomNavMenu(navController)
+//        setupNavigationMenu(navController)
+    }
+
+    private fun setupBottomNavMenu(navController: NavController) {
+        val bottomNav = binding.bottomNavView
+        bottomNav.setupWithNavController(navController)
+    }
+
+    private fun setupActionBar(navController: NavController, appBarConfig : AppBarConfiguration) {
+        setupActionBarWithNavController(navController, appBarConfig)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return findNavController(R.id.nav_host_fragment).navigateUp(appBarConfiguration)
+    }
+
+//    private fun setupNavigationMenu(navController: NavController) {
+//        val sideNavView = findViewById<NavigationView>(androidx.navigation.ui.R.id.nav_view)
+//        sideNavView?.setupWithNavController(navController)
+//    }
+
+    // old version. Keeping it because it has splash screen animation
+//    @RequiresApi(Build.VERSION_CODES.S)
+    /*override fun onCreate(savedInstanceState: Bundle?) {
 
 //        setTheme(R.style.Splash)
         super.onCreate(savedInstanceState)
@@ -33,12 +67,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navView: BottomNavigationView = binding.navView
+        val bottomNav: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(
+        appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_pod,
                 R.id.navigation_gallery,
@@ -48,10 +82,10 @@ class MainActivity : AppCompatActivity() {
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        bottomNav.setupWithNavController(navController)
 
         // splash screen for android 12
-        /*var isHideSplashScreen = false
+        *//*var isHideSplashScreen = false
         object : CountDownTimer(2000, 1000) {
             override fun onTick(millisUntilFinished: Long) {}
             override fun onFinish() {
@@ -69,10 +103,10 @@ class MainActivity : AppCompatActivity() {
                         false
                     }
                 }
-            })*/
+            })*//*
 
         // animation for splash screen
-        /*splashScreen.setOnExitAnimationListener { splashScreenView ->
+        *//*splashScreen.setOnExitAnimationListener { splashScreenView ->
             val slideLeft = ObjectAnimator.ofFloat(
                 splashScreenView,
                 View.TRANSLATION_X,
@@ -84,7 +118,8 @@ class MainActivity : AppCompatActivity() {
 
             slideLeft.doOnEnd { splashScreenView.remove() }
             slideLeft.start()
-        }*/
+        }*//*
+    }*/
 
-    }
+
 }
