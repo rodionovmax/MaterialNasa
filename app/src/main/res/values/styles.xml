@@ -28,4 +28,9 @@
         <item name="android:indeterminateTint">@color/violet</item>
     </style>
 
+    <style name="DialogTextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
 </resources>

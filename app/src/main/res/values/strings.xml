@@ -28,5 +28,10 @@
     <string name="picture_from_mars">Picture from Mars</string>
     <string name="drag_handle">Drag handle</string>
     <string name="highlight">Light</string>
+    <string name="select_photo">Add photo</string>
+    <string name="take_photo">Use camera…</string>
+    <string name="choose_from_library">Choose from library…</string>
+    <string name="fab">FAB</string>
+    <string name="plus_icon">Plus icon</string>
 
 </resources>

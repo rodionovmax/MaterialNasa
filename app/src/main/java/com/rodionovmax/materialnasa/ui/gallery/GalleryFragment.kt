@@ -5,14 +5,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
+
 
 class GalleryFragment : Fragment() {
 
@@ -56,9 +60,44 @@ class GalleryFragment : Fragment() {
 
         initViews()
         initViewModel()
+        setFab()
 
         itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(adapter, requireActivity()))
         itemTouchHelper.attachToRecyclerView(binding.galleryRecycler)
+    }
+
+    private fun setFab() {
+        binding.fab.setOnClickListener {
+            showAddPhotoAlertDialog()
+//            showDialog() // option 2
+        }
+    }
+
+    // option 1. build alert dialog
+    private fun showAddPhotoAlertDialog() {
+        val customLayout: View = layoutInflater.inflate(R.layout.fragment_add_photo_dialog, null)
+
+        AlertDialog.Builder(requireActivity())
+            .setView(customLayout)
+            .setNegativeButton("Cancel") { dialog, i ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+
+        customLayout.findViewById<View>(R.id.camera_button).setOnClickListener {
+            Toast.makeText(requireContext(), "Going to camera app...", Toast.LENGTH_SHORT).show()
+        }
+        customLayout.findViewById<View>(R.id.library_button).setOnClickListener {
+            Toast.makeText(requireContext(), "Going to photo gallery...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // option 2. call dialog from another fragment using fragment manager
+    private fun showDialog() {
+        val fm: FragmentManager = activity?.supportFragmentManager ?: throw Exception("Activity does not exist")
+        val addPhotoDialogFragment = AddPhotoDialogFragment()
+        addPhotoDialogFragment.show(fm, "fragment_edit_name")
     }
 
     private fun initViewModel() {
