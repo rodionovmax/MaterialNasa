@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.rodionovmax.materialnasa.utils.Converters
 
 @Database(
     entities = [GalleryPodEntity::class, RoverPhotoEntity::class],
     version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class LocalDatabase : RoomDatabase() {
     abstract val localDao: LocalDao
     abstract val roverGalleryDao: RoverGalleryDao

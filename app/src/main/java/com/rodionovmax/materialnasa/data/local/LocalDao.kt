@@ -34,4 +34,5 @@ interface LocalDao {
 
     @Query("update favorite_pod set position=:posTo where date=:date")
     fun updatePositionOfMovedItem(posTo: Int, date: String)
+
 }

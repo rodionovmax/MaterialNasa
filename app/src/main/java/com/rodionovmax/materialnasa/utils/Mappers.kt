@@ -1,12 +1,11 @@
 package com.rodionovmax.materialnasa.utils
 
-import androidx.lifecycle.Transformations.map
+import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
 import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.model.Pod
-import com.rodionovmax.materialnasa.data.network.model.MarsPhotoDto
 import com.rodionovmax.materialnasa.data.network.model.MarsResultsDto
 
 fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
@@ -17,7 +16,10 @@ fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
     copyright = copyright,
     date = date,
     isSaved = isSaved,
-    position = 0
+    position = 0,
+    source = source,
+    name = name,
+    bmp = bmp
 )
 
 fun PodDto.asDomainPod() = Pod(
@@ -28,18 +30,24 @@ fun PodDto.asDomainPod() = Pod(
     mediaType = mediaType,
     title = title,
     url = url,
-    isSaved = false
+    isSaved = false,
+    source = 1,
+    name = null,
+    bmp = null
 )
 
 fun GalleryPodEntity.asDomainPod() = Pod(
     copyright = copyright ?: "",
-    date = date,
-    description = description,
+    date = date ?: "",
+    description = description ?: "",
     hdUrl = "",
     mediaType = "",
-    title = title,
-    url = imgUrl,
-    isSaved = isSaved
+    title = title ?: "",
+    url = imgUrl ?: "",
+    isSaved = isSaved,
+    source = source,
+    name = name,
+    bmp = bmp
 )
 
 fun asDomainMarsPhotos(marsResultsDto: MarsResultsDto): List<MarsPhoto> {
@@ -66,7 +74,19 @@ fun asEntityRoverPhotos(marsPhotos: List<MarsPhoto>): List<RoverPhotoEntity> {
     }
 }
 
-
+fun CameraPhotoEntity.toPod(): Pod = Pod(
+    copyright = "Max Rodionov",
+    date = getTimestamp(),
+    description = null,
+    hdUrl = null,
+    mediaType = null,
+    title = "Photo from camera",
+    url = null,
+    isSaved = true,
+    source = 2,
+    name = name,
+    bmp = bmp
+)
 
 /*
 data class GalleryPodEntity(

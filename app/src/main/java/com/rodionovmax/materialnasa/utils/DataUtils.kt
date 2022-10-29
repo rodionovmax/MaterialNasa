@@ -13,3 +13,13 @@ fun getDateWithOffset(daysOffset: Int): String {
     Log.d("getDate", "Date with offset - $daysOffset $text")
     return text
 }
+
+fun getTimestamp(): String {
+    return System.currentTimeMillis().toString()
+}
+
+fun timestampToDate(timestamp: String): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val netDate = Date(timestamp.toLong())
+    return sdf.format(netDate)
+}

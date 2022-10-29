@@ -1,10 +1,7 @@
 package com.rodionovmax.materialnasa.data.repo_impl
 
 import com.rodionovmax.materialnasa.data.Result
-import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
-import com.rodionovmax.materialnasa.data.local.LocalDao
-import com.rodionovmax.materialnasa.data.local.RoverGalleryDao
-import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
+import com.rodionovmax.materialnasa.data.local.*
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.data.repo.LocalRepo
@@ -57,8 +54,8 @@ class LocalRepoImpl(
 
     override suspend fun removeItemFromGallery(pod: Pod) {
         withContext(Dispatchers.IO) {
-            localDataSource.updateItemPositionsInGalleryWhenDeletingPicture(pod.date)
-            localDataSource.deletePodByDate(pod.date)
+            pod.date?.let { localDataSource.updateItemPositionsInGalleryWhenDeletingPicture(it) }
+            pod.date?.let { localDataSource.deletePodByDate(it) }
         }
     }
 
@@ -66,10 +63,10 @@ class LocalRepoImpl(
         withContext(Dispatchers.IO) {
             if (posFrom < posTo) {
                 localDataSource.adjustPositionsIfMovedDown(posFrom, posTo)
-                localDataSource.updatePositionOfMovedItem(posTo, currentItem.date)
+                currentItem.date?.let { localDataSource.updatePositionOfMovedItem(posTo, it) }
             } else {
                 localDataSource.adjustPositionsIfMovedUp(posFrom, posTo)
-                localDataSource.updatePositionOfMovedItem(posTo, currentItem.date)
+                currentItem.date?.let { localDataSource.updatePositionOfMovedItem(posTo, it) }
             }
         }
     }

@@ -4,9 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.data.repo.LocalRepo
 import com.rodionovmax.materialnasa.utils.SingleEventLiveData
+import com.rodionovmax.materialnasa.utils.toPod
 import kotlinx.coroutines.launch
 
 class GalleryViewModel(
@@ -35,6 +37,15 @@ class GalleryViewModel(
         }
         _progressLiveData.postValue(false)
     }
+
+    fun addToGallery(cameraPhoto: CameraPhotoEntity) {
+        _progressLiveData.postValue(true)
+        viewModelScope.launch {
+            localRepo.addPodToGallery(cameraPhoto.toPod())
+        }
+        _progressLiveData.postValue(false)
+    }
+
 
     fun updateGalleryItemPositionsInDb(posFrom: Int, posTo: Int, currentItem: Pod) {
         viewModelScope.launch {

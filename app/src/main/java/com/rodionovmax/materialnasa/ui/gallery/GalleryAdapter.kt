@@ -40,6 +40,8 @@ class GalleryAdapter(
         notifyDataSetChanged()
     }
 
+    fun countItems(): Int = gallery.size
+
     // function to implement DiffUtil
     // the problem here is that idk how to get data from viewmodel when adapter is initialized
     // when fragment calls adapter viewmodel is not initialized
