@@ -1,6 +1,8 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -29,6 +31,8 @@ import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.model.InternalStoragePhoto
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
+import com.rodionovmax.materialnasa.ui.settings.SHARED_PREFS
+import com.rodionovmax.materialnasa.ui.settings.IS_EXTERNAL_STORAGE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,6 +47,7 @@ class GalleryFragment : Fragment() {
     private val viewModel by lazy { GalleryViewModel(app.localRepo) }
     lateinit var itemTouchHelper: ItemTouchHelper
     private lateinit var takePhoto: ActivityResultLauncher<Void?>
+    val prefs: SharedPreferences by lazy { requireActivity().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE) }
 
     companion object {
         private const val CAMERA_PERMISSION_CODE = 1
@@ -90,14 +95,19 @@ class GalleryFragment : Fragment() {
         itemTouchHelper.attachToRecyclerView(binding.galleryRecycler)
 
         takePhoto = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-            val fileName = UUID.randomUUID().toString()
-            val isSavedSuccessfully =
-                it?.let { bmp -> savePhotoToInternalStorage(fileName, bmp) }
-            if (isSavedSuccessfully == true) {
-                loadLatestPhotoFromInternalStorage()
+            val isExternalStorage = prefs.getBoolean(IS_EXTERNAL_STORAGE, true)
+            if (!isExternalStorage) {
+                val fileName = UUID.randomUUID().toString()
+                val isSavedSuccessfully =
+                    it?.let { bmp -> savePhotoToInternalStorage(fileName, bmp) }
+                if (isSavedSuccessfully == true) {
+                    loadLatestPhotoFromInternalStorage()
+                }
+                val gallerySize = adapter.countItems()
+                viewModel.addToGallery(CameraPhotoEntity(gallerySize + 1, "$fileName.jpg", it!!))
+            } else {
+                Toast.makeText(requireActivity(), "You've chosen external storage", Toast.LENGTH_SHORT).show()
             }
-            val gallerySize = adapter.countItems()
-            viewModel.addToGallery(CameraPhotoEntity(gallerySize + 1, "$fileName.jpg", it!!))
         }
     }
 
