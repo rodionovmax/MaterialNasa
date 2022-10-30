@@ -1,12 +1,16 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
+import android.Manifest
+import android.content.ContentValues
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -31,8 +35,9 @@ import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.model.InternalStoragePhoto
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
-import com.rodionovmax.materialnasa.ui.settings.SHARED_PREFS
 import com.rodionovmax.materialnasa.ui.settings.IS_EXTERNAL_STORAGE
+import com.rodionovmax.materialnasa.ui.settings.SHARED_PREFS
+import com.rodionovmax.materialnasa.utils.sdk29AndUp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,7 +52,10 @@ class GalleryFragment : Fragment() {
     private val viewModel by lazy { GalleryViewModel(app.localRepo) }
     lateinit var itemTouchHelper: ItemTouchHelper
     private lateinit var takePhoto: ActivityResultLauncher<Void?>
-    val prefs: SharedPreferences by lazy { requireActivity().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE) }
+    private val prefs: SharedPreferences by lazy { requireActivity().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE) }
+    private var readPermissionGranted = false
+    private var writePermissionGranted = false
+    private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
 
     companion object {
         private const val CAMERA_PERMISSION_CODE = 1
@@ -94,9 +102,19 @@ class GalleryFragment : Fragment() {
         itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(adapter, requireActivity()))
         itemTouchHelper.attachToRecyclerView(binding.galleryRecycler)
 
-        takePhoto = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+        permissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            readPermissionGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+            writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
+
+
+        }
+        updateOrRequestPermissions()
+
+        takePhoto = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
             val isExternalStorage = prefs.getBoolean(IS_EXTERNAL_STORAGE, true)
-            if (!isExternalStorage) {
+            val fileName = UUID.randomUUID().toString()
+            val gallerySize = adapter.countItems()
+            /*if (!isExternalStorage) {
                 val fileName = UUID.randomUUID().toString()
                 val isSavedSuccessfully =
                     it?.let { bmp -> savePhotoToInternalStorage(fileName, bmp) }
@@ -107,7 +125,83 @@ class GalleryFragment : Fragment() {
                 viewModel.addToGallery(CameraPhotoEntity(gallerySize + 1, "$fileName.jpg", it!!))
             } else {
                 Toast.makeText(requireActivity(), "You've chosen external storage", Toast.LENGTH_SHORT).show()
+            }*/
+            val isSavedSuccessfully = when {
+                !isExternalStorage -> bitmap?.let { it ->
+                    savePhotoToInternalStorage(fileName, it)
+                }
+                writePermissionGranted -> bitmap?.let { it ->
+                    savePhotoToExternalStorage(fileName, it)
+                }
+                else -> false
             }
+            if(!isExternalStorage) {
+                loadLatestPhotoFromInternalStorage()
+                viewModel.addToGallery(CameraPhotoEntity(gallerySize + 1, "$fileName.jpg", bitmap!!))
+            }
+            val storage = if (isExternalStorage) {
+                "external"
+            } else {
+                "internal"
+            }
+            if(isSavedSuccessfully == true) {
+                Toast.makeText(requireContext(), "Photo saved successfully to $storage storage", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Failed to save photo", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun updateOrRequestPermissions() {
+        val hasReadPermission = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val hasWritePermission = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+
+        readPermissionGranted = hasReadPermission
+        writePermissionGranted = hasWritePermission || minSdk29
+
+        val permissionsToRequest = mutableListOf<String>()
+        if (!writePermissionGranted) {
+            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        if (!readPermissionGranted) {
+            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if (permissionsToRequest.isNotEmpty()) {
+            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    private fun savePhotoToExternalStorage(displayName: String, bmp: Bitmap): Boolean {
+        val imageCollection = sdk29AndUp {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "$displayName.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.WIDTH, bmp.width)
+            put(MediaStore.Images.Media.HEIGHT, bmp.height)
+        }
+        return try {
+            requireContext().contentResolver.insert(imageCollection, contentValues)?.also { uri ->
+                requireContext().contentResolver.openOutputStream(uri).use { outputStream ->
+                    if(!bmp.compress(Bitmap.CompressFormat.JPEG, 95, outputStream)) {
+                        throw IOException("Couldn't save bitmap")
+                    }
+                }
+            } ?: throw IOException("Couldn't create MediaStore entry")
+            true
+        } catch(e: IOException) {
+            e.printStackTrace()
+            false
         }
     }
 
