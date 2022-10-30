@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.model.SharedStoragePhoto
 import com.rodionovmax.materialnasa.data.repo.LocalRepo
 import com.rodionovmax.materialnasa.utils.SingleEventLiveData
 import com.rodionovmax.materialnasa.utils.toPod
@@ -38,7 +39,7 @@ class GalleryViewModel(
         _progressLiveData.postValue(false)
     }
 
-    fun addToGallery(cameraPhoto: CameraPhotoEntity) {
+    fun addCameraPhotoToDb(cameraPhoto: CameraPhotoEntity) {
         _progressLiveData.postValue(true)
         viewModelScope.launch {
             localRepo.addPodToGallery(cameraPhoto.toPod())
@@ -46,6 +47,13 @@ class GalleryViewModel(
         _progressLiveData.postValue(false)
     }
 
+    fun addGalleryPictureToDb(sharedPicture: SharedStoragePhoto) {
+        _progressLiveData.postValue(true)
+        viewModelScope.launch {
+            localRepo.addPodToGallery(sharedPicture.toPod())
+        }
+        _progressLiveData.postValue(false)
+    }
 
     fun updateGalleryItemPositionsInDb(posFrom: Int, posTo: Int, currentItem: Pod) {
         viewModelScope.launch {

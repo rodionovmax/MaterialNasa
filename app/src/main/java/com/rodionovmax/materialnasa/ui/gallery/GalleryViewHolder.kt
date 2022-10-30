@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -23,6 +24,10 @@ class GalleryViewHolder(
     fun bind(galleryItem: Pod, dragListener: GalleryListeners.OnStartDragListener) {
         if (galleryItem.bmp != null) {
             binding.galleryItemImage.setImageBitmap(galleryItem.bmp).also {
+                binding.galleryItemImage.scaleType = ImageView.ScaleType.FIT_CENTER
+            }
+        } else if (galleryItem.uri != null) {
+            binding.galleryItemImage.setImageURI(galleryItem.uri).also {
                 binding.galleryItemImage.scaleType = ImageView.ScaleType.FIT_CENTER
             }
         } else {

@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.data.local
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -16,7 +17,8 @@ data class GalleryPodEntity(
     val position: Int?,
     val source: Int,
     val name: String?,
-    val bmp: Bitmap?
+    val bmp: Bitmap?,
+    val uri: Uri?
 )
 
 @Entity(tableName = "rover_photos")

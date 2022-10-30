@@ -33,7 +33,7 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.photoStorageSwitch.isChecked = prefs.getBoolean(IS_EXTERNAL_STORAGE, true)
+        binding.photoStorageSwitch.isChecked = prefs.getBoolean(IS_EXTERNAL_STORAGE, false)
 
         binding.photoStorageSwitch.setOnCheckedChangeListener { _, toggleValue ->
 //            if (savedInstanceState == null) {

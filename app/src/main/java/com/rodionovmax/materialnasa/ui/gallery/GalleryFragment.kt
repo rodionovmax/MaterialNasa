@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
 import android.Manifest
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
@@ -34,18 +35,17 @@ import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.model.InternalStoragePhoto
 import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.model.SharedStoragePhoto
 import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
 import com.rodionovmax.materialnasa.ui.settings.IS_EXTERNAL_STORAGE
 import com.rodionovmax.materialnasa.ui.settings.SHARED_PREFS
 import com.rodionovmax.materialnasa.utils.sdk29AndUp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.util.*
 
 
-class GalleryFragment : Fragment() {
+open class GalleryFragment : Fragment() {
 
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!!
@@ -53,6 +53,7 @@ class GalleryFragment : Fragment() {
     lateinit var itemTouchHelper: ItemTouchHelper
     private lateinit var takePhoto: ActivityResultLauncher<Void?>
     private val prefs: SharedPreferences by lazy { requireActivity().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE) }
+
     private var readPermissionGranted = false
     private var writePermissionGranted = false
     private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
@@ -111,44 +112,93 @@ class GalleryFragment : Fragment() {
         updateOrRequestPermissions()
 
         takePhoto = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            val isExternalStorage = prefs.getBoolean(IS_EXTERNAL_STORAGE, true)
+
+            val isExternalStorage = prefs.getBoolean(IS_EXTERNAL_STORAGE, false)
             val fileName = UUID.randomUUID().toString()
             val gallerySize = adapter.countItems()
-            /*if (!isExternalStorage) {
-                val fileName = UUID.randomUUID().toString()
-                val isSavedSuccessfully =
-                    it?.let { bmp -> savePhotoToInternalStorage(fileName, bmp) }
+
+            lifecycleScope.launch(Dispatchers.Main) {
+                val isSavedSuccessfully = when {
+                    !isExternalStorage -> bitmap?.let { it ->
+                        savePhotoToInternalStorage(fileName, it)
+                    }
+                    writePermissionGranted -> bitmap?.let { it ->
+                        savePhotoToExternalStorage(fileName, it)
+                    }
+                    else -> false
+                }
+
+                if (!isExternalStorage) {
+                    saveLatestPhotoFromInternalStorageToDb()
+                    viewModel.addCameraPhotoToDb(
+                        CameraPhotoEntity(
+                            gallerySize + 1,
+                            "$fileName.jpg",
+                            bitmap!!
+                        )
+                    )
+                } else {
+                    delay(1000) // replace by job.await() or other async
+                    saveLatestPhotoFromExternalStorageToDb()
+                }
+                val storage = if (isExternalStorage) {
+                    "external"
+                } else {
+                    "internal"
+                }
                 if (isSavedSuccessfully == true) {
-                    loadLatestPhotoFromInternalStorage()
+                    Toast.makeText(
+                        requireContext(),
+                        "Photo saved successfully to $storage storage",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to save photo", Toast.LENGTH_SHORT)
+                        .show()
                 }
-                val gallerySize = adapter.countItems()
-                viewModel.addToGallery(CameraPhotoEntity(gallerySize + 1, "$fileName.jpg", it!!))
-            } else {
-                Toast.makeText(requireActivity(), "You've chosen external storage", Toast.LENGTH_SHORT).show()
-            }*/
-            val isSavedSuccessfully = when {
-                !isExternalStorage -> bitmap?.let { it ->
-                    savePhotoToInternalStorage(fileName, it)
+            }
+        }
+    }
+
+    private suspend fun loadPhotosFromExternalStorage(): List<SharedStoragePhoto> {
+        return withContext(Dispatchers.IO) {
+            val collection = sdk29AndUp {
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+            val projection = arrayOf(
+                MediaStore.Images.Media._ID,
+                MediaStore.Images.Media.DISPLAY_NAME,
+                MediaStore.Images.Media.WIDTH,
+                MediaStore.Images.Media.HEIGHT,
+            )
+            val photos = mutableListOf<SharedStoragePhoto>()
+            requireContext().contentResolver.query(
+                collection,
+                projection,
+                null,
+                null,
+//                "${MediaStore.Images.Media.DISPLAY_NAME} ASC"
+                "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
+            )?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                val displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+                val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
+                val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
+
+                while(cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    val displayName = cursor.getString(displayNameColumn)
+                    val width = cursor.getInt(widthColumn)
+                    val height = cursor.getInt(heightColumn)
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        id
+                    )
+                    photos.add(SharedStoragePhoto(id, displayName, width, height, contentUri))
                 }
-                writePermissionGranted -> bitmap?.let { it ->
-                    savePhotoToExternalStorage(fileName, it)
-                }
-                else -> false
-            }
-            if(!isExternalStorage) {
-                loadLatestPhotoFromInternalStorage()
-                viewModel.addToGallery(CameraPhotoEntity(gallerySize + 1, "$fileName.jpg", bitmap!!))
-            }
-            val storage = if (isExternalStorage) {
-                "external"
-            } else {
-                "internal"
-            }
-            if(isSavedSuccessfully == true) {
-                Toast.makeText(requireContext(), "Photo saved successfully to $storage storage", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "Failed to save photo", Toast.LENGTH_SHORT).show()
-            }
+                photos.toList()
+            } ?: listOf()
         }
     }
 
@@ -179,38 +229,49 @@ class GalleryFragment : Fragment() {
         }
     }
 
-    private fun savePhotoToExternalStorage(displayName: String, bmp: Bitmap): Boolean {
-        val imageCollection = sdk29AndUp {
-            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-        } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    private suspend fun savePhotoToExternalStorage(displayName: String, bmp: Bitmap): Boolean {
+        return withContext(Dispatchers.Default) {
+            val imageCollection = sdk29AndUp {
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            } ?: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "$displayName.jpg")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.WIDTH, bmp.width)
-            put(MediaStore.Images.Media.HEIGHT, bmp.height)
-        }
-        return try {
-            requireContext().contentResolver.insert(imageCollection, contentValues)?.also { uri ->
-                requireContext().contentResolver.openOutputStream(uri).use { outputStream ->
-                    if(!bmp.compress(Bitmap.CompressFormat.JPEG, 95, outputStream)) {
-                        throw IOException("Couldn't save bitmap")
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, "$displayName.jpg")
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.Media.WIDTH, bmp.width)
+                put(MediaStore.Images.Media.HEIGHT, bmp.height)
+            }
+            try {
+                requireContext().contentResolver.insert(imageCollection, contentValues)?.also { uri ->
+                    requireContext().contentResolver.openOutputStream(uri).use { outputStream ->
+                        if(!bmp.compress(Bitmap.CompressFormat.JPEG, 95, outputStream)) {
+                            throw IOException("Couldn't save bitmap")
+                        }
                     }
-                }
-            } ?: throw IOException("Couldn't create MediaStore entry")
-            true
-        } catch(e: IOException) {
-            e.printStackTrace()
-            false
+                } ?: throw IOException("Couldn't create MediaStore entry")
+                true
+            } catch(e: IOException) {
+                e.printStackTrace()
+                false
+            }
         }
     }
 
-    private fun loadLatestPhotoFromInternalStorage() {
+    private fun saveLatestPhotoFromInternalStorageToDb() {
         lifecycleScope.launch {
             val photos = loadPhotosFromInternalStorage()
             // check latest photo
             Log.d("my_tag", photos[0].name)
         }
+    }
+
+    private fun saveLatestPhotoFromExternalStorageToDb() {
+        lifecycleScope.launch {
+            val photos = async { loadPhotosFromExternalStorage() }.await()
+            val latestPhoto = photos[0]
+            viewModel.addGalleryPictureToDb(latestPhoto)
+        }
+
     }
 
     private suspend fun loadPhotosFromInternalStorage(): List<InternalStoragePhoto> {
@@ -225,17 +286,19 @@ class GalleryFragment : Fragment() {
         }
     }
 
-    private fun savePhotoToInternalStorage(filename: String, bmp: Bitmap): Boolean {
-        return try {
-            requireContext().openFileOutput("$filename.jpg", MODE_PRIVATE).use { stream ->
-                if (!bmp.compress(Bitmap.CompressFormat.JPEG, 95, stream)) {
-                    throw IOException("Couldn't save bitmap")
+    private suspend fun savePhotoToInternalStorage(filename: String, bmp: Bitmap): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                requireContext().openFileOutput("$filename.jpg", MODE_PRIVATE).use { stream ->
+                    if (!bmp.compress(Bitmap.CompressFormat.JPEG, 95, stream)) {
+                        throw IOException("Couldn't save bitmap")
+                    }
                 }
+                true
+            } catch (e: IOException) {
+                e.printStackTrace()
+                false
             }
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return false
         }
     }
 

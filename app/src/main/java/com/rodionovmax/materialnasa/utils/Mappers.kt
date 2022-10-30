@@ -6,6 +6,7 @@ import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.model.SharedStoragePhoto
 import com.rodionovmax.materialnasa.data.network.model.MarsResultsDto
 
 fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
@@ -19,7 +20,8 @@ fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
     position = 0,
     source = source,
     name = name,
-    bmp = bmp
+    bmp = bmp,
+    uri = uri
 )
 
 fun PodDto.asDomainPod() = Pod(
@@ -33,7 +35,8 @@ fun PodDto.asDomainPod() = Pod(
     isSaved = false,
     source = 1,
     name = null,
-    bmp = null
+    bmp = null,
+    uri = null
 )
 
 fun GalleryPodEntity.asDomainPod() = Pod(
@@ -47,7 +50,8 @@ fun GalleryPodEntity.asDomainPod() = Pod(
     isSaved = isSaved,
     source = source,
     name = name,
-    bmp = bmp
+    bmp = bmp,
+    uri = uri
 )
 
 fun asDomainMarsPhotos(marsResultsDto: MarsResultsDto): List<MarsPhoto> {
@@ -85,7 +89,23 @@ fun CameraPhotoEntity.toPod(): Pod = Pod(
     isSaved = true,
     source = 2,
     name = name,
-    bmp = bmp
+    bmp = bmp,
+    uri = null
+)
+
+fun SharedStoragePhoto.toPod(): Pod = Pod(
+    copyright = "Google",
+    date = getTimestamp(),
+    description = null,
+    hdUrl = null,
+    mediaType = null,
+    title = "Picture from phone gallery",
+    url = null,
+    isSaved = true,
+    source = 3,
+    name = name,
+    bmp = null,
+    uri = contentUri
 )
 
 /*

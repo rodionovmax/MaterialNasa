@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.data.model
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -16,5 +17,6 @@ data class Pod (
     var isSaved: Boolean,
     val source: Int,
     val name: String?,
-    val bmp: Bitmap?
+    val bmp: Bitmap?,
+    val uri: Uri?
 ) : Parcelable
