@@ -5,12 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
+import com.rodionovmax.materialnasa.data.model.GalleryPhoto
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.data.model.SharedStoragePhoto
 import com.rodionovmax.materialnasa.data.repo.LocalRepo
 import com.rodionovmax.materialnasa.utils.SingleEventLiveData
 import com.rodionovmax.materialnasa.utils.toPod
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class GalleryViewModel(
     private val localRepo: LocalRepo
@@ -47,10 +48,18 @@ class GalleryViewModel(
         _progressLiveData.postValue(false)
     }
 
-    fun addGalleryPictureToDb(sharedPicture: SharedStoragePhoto) {
+    fun addSharedStoragePhotoToDb(sharedPicture: SharedStoragePhoto) {
         _progressLiveData.postValue(true)
         viewModelScope.launch {
             localRepo.addPodToGallery(sharedPicture.toPod())
+        }
+        _progressLiveData.postValue(false)
+    }
+
+    fun addPhotoFromGalleryToDb(galleryPhoto: GalleryPhoto) {
+        _progressLiveData.postValue(true)
+        viewModelScope.launch {
+            localRepo.addPodToGallery(galleryPhoto.toPod())
         }
         _progressLiveData.postValue(false)
     }

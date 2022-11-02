@@ -1,10 +1,10 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
 import android.annotation.SuppressLint
-import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rodionovmax.materialnasa.R

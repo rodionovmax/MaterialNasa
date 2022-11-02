@@ -1,11 +1,8 @@
 package com.rodionovmax.materialnasa.ui.gallery
 
 import android.Manifest
-import android.content.ContentUris
-import android.content.ContentValues
-import android.content.Context
+import android.content.*
 import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -33,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rodionovmax.materialnasa.R
 import com.rodionovmax.materialnasa.app
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
+import com.rodionovmax.materialnasa.data.model.GalleryPhoto
 import com.rodionovmax.materialnasa.data.model.InternalStoragePhoto
 import com.rodionovmax.materialnasa.data.model.Pod
 import com.rodionovmax.materialnasa.data.model.SharedStoragePhoto
@@ -40,9 +38,11 @@ import com.rodionovmax.materialnasa.databinding.FragmentGalleryBinding
 import com.rodionovmax.materialnasa.ui.settings.IS_EXTERNAL_STORAGE
 import com.rodionovmax.materialnasa.ui.settings.SHARED_PREFS
 import com.rodionovmax.materialnasa.utils.sdk29AndUp
+import com.rodionovmax.materialnasa.utils.toPod
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.util.*
+import kotlin.concurrent.thread
 
 
 open class GalleryFragment : Fragment() {
@@ -51,12 +51,13 @@ open class GalleryFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel by lazy { GalleryViewModel(app.localRepo) }
     lateinit var itemTouchHelper: ItemTouchHelper
-    private lateinit var takePhoto: ActivityResultLauncher<Void?>
     private val prefs: SharedPreferences by lazy { requireActivity().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE) }
 
     private var readPermissionGranted = false
     private var writePermissionGranted = false
+    private lateinit var takePhoto: ActivityResultLauncher<Void?>
     private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var selectImageFromGallery: ActivityResultLauncher<String?>
 
     companion object {
         private const val CAMERA_PERMISSION_CODE = 1
@@ -115,7 +116,6 @@ open class GalleryFragment : Fragment() {
 
             val isExternalStorage = prefs.getBoolean(IS_EXTERNAL_STORAGE, false)
             val fileName = UUID.randomUUID().toString()
-            val gallerySize = adapter.countItems()
 
             lifecycleScope.launch(Dispatchers.Main) {
                 val isSavedSuccessfully = when {
@@ -127,18 +127,13 @@ open class GalleryFragment : Fragment() {
                     }
                     else -> false
                 }
-
                 if (!isExternalStorage) {
                     saveLatestPhotoFromInternalStorageToDb()
-                    viewModel.addCameraPhotoToDb(
-                        CameraPhotoEntity(
-                            gallerySize + 1,
-                            "$fileName.jpg",
-                            bitmap!!
-                        )
-                    )
+                    val photo = CameraPhotoEntity(0, "$fileName.jpg", bitmap!!)
+                    viewModel.addCameraPhotoToDb(photo)
+                    insertPictureIntoRecycler(photo.toPod())
                 } else {
-                    delay(1000) // replace by job.await() or other async
+                    delay(500) // replace by job.await() or other async
                     saveLatestPhotoFromExternalStorageToDb()
                 }
                 val storage = if (isExternalStorage) {
@@ -156,6 +151,16 @@ open class GalleryFragment : Fragment() {
                     Toast.makeText(requireContext(), "Failed to save photo", Toast.LENGTH_SHORT)
                         .show()
                 }
+            }
+        }
+
+        selectImageFromGallery = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                // getting bitmap from uri because uri is kind of temp and the app would crash after restart
+                val bitmap = MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+                val galleryPhoto = GalleryPhoto(uri, bitmap)
+                viewModel.addPhotoFromGalleryToDb(galleryPhoto)
+                insertPictureIntoRecycler(galleryPhoto.toPod())
             }
         }
     }
@@ -266,12 +271,14 @@ open class GalleryFragment : Fragment() {
     }
 
     private fun saveLatestPhotoFromExternalStorageToDb() {
-        lifecycleScope.launch {
-            val photos = async { loadPhotosFromExternalStorage() }.await()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val photos = loadPhotosFromExternalStorage()
             val latestPhoto = photos[0]
-            viewModel.addGalleryPictureToDb(latestPhoto)
+            viewModel.addSharedStoragePhotoToDb(latestPhoto)
+            withContext(Dispatchers.Main) {
+                insertPictureIntoRecycler(latestPhoto.toPod())
+            }
         }
-
     }
 
     private suspend fun loadPhotosFromInternalStorage(): List<InternalStoragePhoto> {
@@ -324,12 +331,12 @@ open class GalleryFragment : Fragment() {
             // cancelling dialog after clicking on a button
             alertDialog.cancel()
 
-            if ((ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.CAMERA)) == PackageManager.PERMISSION_GRANTED) {
+            if ((ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)) == PackageManager.PERMISSION_GRANTED) {
                 takePhoto.launch()
             } else {
                 ActivityCompat.requestPermissions(
                     requireActivity(),
-                    arrayOf(android.Manifest.permission.CAMERA),
+                    arrayOf(Manifest.permission.CAMERA),
                     CAMERA_PERMISSION_CODE
                 )
             }
@@ -348,6 +355,10 @@ open class GalleryFragment : Fragment() {
             Toast.makeText(requireContext(), "Going to camera app...", Toast.LENGTH_SHORT).show()
         }
         customLayout.findViewById<View>(R.id.library_button).setOnClickListener {
+            // cancelling dialog after clicking on a button
+            alertDialog.cancel()
+
+            selectImageFromGallery.launch("image/*")
             Toast.makeText(requireContext(), "Going to photo gallery...", Toast.LENGTH_SHORT).show()
         }
 
@@ -375,6 +386,10 @@ open class GalleryFragment : Fragment() {
     private fun showGallery(gallery: List<Pod>) {
         adapter.setData(gallery)
 //        adapter.setNewData(gallery)
+    }
+
+    private fun insertPictureIntoRecycler(picture: Pod) {
+        adapter.insertPicture(picture)
     }
 
     private fun showError(error: Throwable) {

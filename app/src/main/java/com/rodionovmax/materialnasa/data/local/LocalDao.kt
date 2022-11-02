@@ -1,6 +1,7 @@
 package com.rodionovmax.materialnasa.data.local
 
 import androidx.room.*
+import com.rodionovmax.materialnasa.data.model.Pod
 
 @Dao
 interface LocalDao {
@@ -35,4 +36,6 @@ interface LocalDao {
     @Query("update favorite_pod set position=:posTo where date=:date")
     fun updatePositionOfMovedItem(posTo: Int, date: String)
 
+    @Query("select * from favorite_pod where position = 0")
+    fun getLatestPod(): Pod
 }

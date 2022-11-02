@@ -40,6 +40,11 @@ class GalleryAdapter(
         notifyDataSetChanged()
     }
 
+    fun insertPicture(pod: Pod) {
+        gallery.add(0, pod)
+        notifyItemInserted(0)
+    }
+
     fun countItems(): Int = gallery.size
 
     // function to implement DiffUtil

@@ -3,6 +3,7 @@ package com.rodionovmax.materialnasa.utils
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
 import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
+import com.rodionovmax.materialnasa.data.model.GalleryPhoto
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.model.Pod
@@ -84,7 +85,7 @@ fun CameraPhotoEntity.toPod(): Pod = Pod(
     description = null,
     hdUrl = null,
     mediaType = null,
-    title = "Photo from camera",
+    title = "Photo from internal storage",
     url = null,
     isSaved = true,
     source = 2,
@@ -99,13 +100,28 @@ fun SharedStoragePhoto.toPod(): Pod = Pod(
     description = null,
     hdUrl = null,
     mediaType = null,
-    title = "Picture from phone gallery",
+    title = "Picture from external storage",
     url = null,
     isSaved = true,
     source = 3,
     name = name,
     bmp = null,
     uri = contentUri
+)
+
+fun GalleryPhoto.toPod(): Pod = Pod(
+    copyright = "Gallery",
+    date = getTimestamp(),
+    description = null,
+    hdUrl = null,
+    mediaType = null,
+    title = "Picture from phone gallery",
+    url = null,
+    isSaved = true,
+    source = 4,
+    name = null,
+    bmp = bitmap,
+    uri = null
 )
 
 /*
