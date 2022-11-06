@@ -48,6 +48,8 @@ android {
 
 dependencies {
 
+    // paging
+    implementation "androidx.paging:paging-runtime-ktx:3.1.1"
     // dot indicator
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.tbuonomo:dotsindicator:4.3'

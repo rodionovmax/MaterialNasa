@@ -108,6 +108,7 @@ class MarsFragment : Fragment() {
             }
             camera?.let { viewModel.setCamera(it) }
             onCameraSelected()
+//            getPhotos()
 
             if (savedInstanceState != null) {
                 if (viewModel.cameraState.value != "") {
@@ -142,6 +143,7 @@ class MarsFragment : Fragment() {
             selectedDate?.let { date -> viewModel.setDate(date) }
 
             onDateSelected()
+//            getPhotos()
         }
         materialDatePicker.show(childFragmentManager, "tag")
     }
@@ -153,6 +155,10 @@ class MarsFragment : Fragment() {
     private fun fetchPhotosFromMars() {
         viewModel.fetchMarsPhotos()
     }
+
+//    private fun getPhotos() {
+//        val photos = viewModel.getPhotosWithPaging()
+//    }
 
     private fun onCameraSelected() {
         if (selectedDate == null || selectedDate == "") {
@@ -207,6 +213,7 @@ class MarsFragment : Fragment() {
                             binding.marsFragmentLoader.visibility = View.GONE
                             binding.marsRecyclerview.visibility = View.VISIBLE
                             adapter.setData(state.data)
+//                            adapter.submitData(state.data)
                         }
                         is MarsUiState.Error -> {
                             binding.marsFragmentLoader.visibility = View.GONE

@@ -3,15 +3,16 @@ package com.rodionovmax.materialnasa.ui.explore.mars
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.rodionovmax.materialnasa.data.Result
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
 import com.rodionovmax.materialnasa.domain.FetchMarsPhotosUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 const val STATE_CAMERA = "camera"
@@ -42,6 +43,17 @@ class MarsViewModel(
             setDate(date)
         }
     }
+
+//    fun getPhotosWithPaging() {
+//        _uiState.value = MarsUiState.Loading
+//        viewModelScope.launch {
+//            _uiState.value = when (val result =
+//                fetchMarsPhotosUseCase.getPhotosWithPaging(_cameraState.value, _dateState.value)) {
+//                is Result.Success -> MarsUiState.Success(data = result.data.last())
+//                is Result.Error -> MarsUiState.Error(Throwable(result.throwable))
+//            }
+//        }
+//    }
 
     fun fetchMarsPhotos() {
         _uiState.value = MarsUiState.Loading

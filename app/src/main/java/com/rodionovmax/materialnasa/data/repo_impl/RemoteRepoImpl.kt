@@ -1,6 +1,8 @@
 package com.rodionovmax.materialnasa.data.repo_impl
 
+import androidx.paging.*
 import com.rodionovmax.materialnasa.BuildConfig
+import com.rodionovmax.materialnasa.data.MarsPhotoPagingSource
 import com.rodionovmax.materialnasa.data.Result
 import com.rodionovmax.materialnasa.data.getResult
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
@@ -11,6 +13,7 @@ import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.asDomainMarsPhotos
 import com.rodionovmax.materialnasa.utils.asDomainPod
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,7 +22,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 private const val BASE_URL = "https://api.nasa.gov/"
-private const val ROVER = "curiosity"
+const val ROVER = "curiosity"
 
 class RemoteRepoImpl : RemoteRepo {
     private val retrofit = Retrofit.Builder()
@@ -67,6 +70,20 @@ class RemoteRepoImpl : RemoteRepo {
             val response = api.getAllRoverPhotos(ROVER, apiKey, earthDate)
             asDomainMarsPhotos(response)
         }
+    }
+
+    override suspend fun getMarsPhotosStream(camera: String, earthDate: String): Result<Flow<PagingData<MarsPhoto>>> = getResult {
+        return@getResult Pager(
+            config = PagingConfig(
+                pageSize = NETWORK_PAGE_SIZE,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { MarsPhotoPagingSource(api, camera, earthDate) }
+        ).flow
+    }
+
+    companion object {
+        const val NETWORK_PAGE_SIZE = 50
     }
 
 }
