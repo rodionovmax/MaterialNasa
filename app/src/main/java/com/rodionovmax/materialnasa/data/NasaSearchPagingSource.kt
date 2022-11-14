@@ -15,6 +15,7 @@ import java.io.IOException
 private const val STARTING_KEY = 0
 private const val GITHUB_STARTING_PAGE_INDEX = 1
 
+// switch to SearchRemoteMediator to save results to the database
 class NasaSearchPagingSource(
     private val service: NasaApiService,
     private val query: String
@@ -58,6 +59,4 @@ class NasaSearchPagingSource(
             return LoadResult.Error(exception)
         }
     }
-
-
 }

@@ -3,6 +3,7 @@ package com.rodionovmax.materialnasa.utils
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
 import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
+import com.rodionovmax.materialnasa.data.local.SearchResultEntity
 import com.rodionovmax.materialnasa.data.model.*
 import com.rodionovmax.materialnasa.data.network.model.ArticleDto
 import com.rodionovmax.materialnasa.data.network.model.ItemsDto
@@ -129,11 +130,40 @@ fun asDomainSearchResults(itemsDto: List<ItemsDto?>): List<SearchResult> {
             SearchResult(
                 id = itemsDto.indexOf(it),
                 title = it.data[0].title,
-                keywords = it.data[0].keywords,
+                keywords = it.data[0].keywords.toString(),
                 description = it.data[0].description,
-                imgUrl = it.links?.get(0)?.url ?: ""
+                imgUrl = it.links?.get(0)?.url ?: "",
+                created = it.data[0].created
             )
         } ?: SearchResult()
+    }
+}
+
+fun toEntitySearchResults(itemsDto: List<ItemsDto?>): List<SearchResultEntity> {
+    return itemsDto.map {
+        it?.let {
+            SearchResultEntity(
+                id = itemsDto.indexOf(it).toLong(),
+                title = it.data[0].title,
+                keywords = it.data[0].keywords.toString(),
+                description = it.data[0].description,
+                imgUrl = it.links?.get(0)?.url ?: "",
+                created = it.data[0].created
+            )
+        } ?: SearchResultEntity()
+    }
+}
+
+fun asEntitySearchResults(searchResult: List<SearchResult>): List<SearchResultEntity> {
+    return searchResult.map {
+        SearchResultEntity(
+            id = it.id.toLong(),
+            title = it.title,
+            keywords = it.keywords,
+            description = it.description,
+            imgUrl = it.imgUrl,
+            created = it.created,
+        )
     }
 }
 
@@ -149,35 +179,3 @@ fun ArticleDto.toArticle(): NewsArticle = NewsArticle(
     content = content ?: ""
 )
 
-/*
-data class GalleryPodEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val imgUrl: String,
-    val title: String,
-    val copyright: String?,
-    val date: String,
-)
-* */
-
-/*
-data class GalleryPod(
-    val id: Int,
-    val imgUrl: String,
-    val title: String,
-    val copyright: String?,
-    val date: String
-) : Parcelable
-* */
-
-/*
-data class Pod (
-    val copyright: String?,
-    val date: String,
-    val description: String,
-    val hdUrl: String?,
-    val mediaType: String,
-    val title: String,
-    val url: String,
-    val isSaved: Boolean
-) : Parcelable
-* */

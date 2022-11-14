@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "favorite_pod")
 data class GalleryPodEntity(
@@ -33,4 +34,14 @@ data class CameraPhotoEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val name: String,
     val bmp: Bitmap
+)
+
+@Entity(tableName = "search_results")
+data class SearchResultEntity(
+    @PrimaryKey @field:SerializedName("id") val id: Long = 0,
+    @field:SerializedName("title") val title: String = "",
+    @field:SerializedName("keywords") val keywords: String = "",
+    @field:SerializedName("description") val description: String? = "",
+    @field:SerializedName("imgUrl") val imgUrl: String = "",
+    @field:SerializedName("created") val created: String = "",
 )

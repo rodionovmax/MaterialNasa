@@ -13,6 +13,7 @@ import java.io.IOException
 
 private const val NEWS_STARTING_PAGE_INDEX = 1
 
+// switch to SearchRemoteMediator to save results to the database
 class NewsPagingSource(
     private val newsApi: NewsApiService,
     private val query: String

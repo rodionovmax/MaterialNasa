@@ -19,7 +19,8 @@ data class ItemsDto(
 data class DataDto(
     @SerializedName("title") val title: String = "",
     @SerializedName("keywords") val keywords: List<String> = listOf(),
-    @SerializedName("description") val description: String = ""
+    @SerializedName("description") val description: String = "",
+    @SerializedName("date_created") val created: String = ""
 )
 
 data class LinkDto(

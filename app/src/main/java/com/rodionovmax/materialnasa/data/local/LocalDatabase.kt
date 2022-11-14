@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.rodionovmax.materialnasa.utils.Converters
 
 @Database(
-    entities = [GalleryPodEntity::class, RoverPhotoEntity::class],
+    entities = [GalleryPodEntity::class, RoverPhotoEntity::class, SearchResultEntity::class, RemoteKeys::class],
     version = 1,
     exportSchema = false
 )
@@ -16,6 +16,9 @@ import com.rodionovmax.materialnasa.utils.Converters
 abstract class LocalDatabase : RoomDatabase() {
     abstract val localDao: LocalDao
     abstract val roverGalleryDao: RoverGalleryDao
+
+    abstract fun resultsDao(): SearchResultDao
+    abstract fun remoteKeysDao(): RemoteKeysDao
 
     companion object {
         private const val DB_NAME = "nasa.db"
