@@ -2,19 +2,21 @@ package com.rodionovmax.materialnasa.data.repo_impl
 
 import androidx.paging.*
 import com.rodionovmax.materialnasa.BuildConfig
-import com.rodionovmax.materialnasa.data.MarsPhotoPagingSource
-import com.rodionovmax.materialnasa.data.Result
-import com.rodionovmax.materialnasa.data.getResult
+import com.rodionovmax.materialnasa.data.*
 import com.rodionovmax.materialnasa.data.model.MarsPhoto
+import com.rodionovmax.materialnasa.data.model.NewsArticle
 import com.rodionovmax.materialnasa.data.network.model.PodDto
 import com.rodionovmax.materialnasa.data.network.NasaApiService
 import com.rodionovmax.materialnasa.data.model.Pod
+import com.rodionovmax.materialnasa.data.model.SearchResult
+import com.rodionovmax.materialnasa.data.network.NewsApiService
 import com.rodionovmax.materialnasa.data.repo.RemoteRepo
 import com.rodionovmax.materialnasa.utils.asDomainMarsPhotos
 import com.rodionovmax.materialnasa.utils.asDomainPod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,15 +24,34 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 private const val BASE_URL = "https://api.nasa.gov/"
+private const val SEARCH_BASE_URL = "https://images-api.nasa.gov/"
+private const val NEWS_BASE_URL = "https://newsapi.org"
 const val ROVER = "curiosity"
 
 class RemoteRepoImpl : RemoteRepo {
-    private val retrofit = Retrofit.Builder()
+    private val builder = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private val api: NasaApiService = retrofit.create(NasaApiService::class.java)
+    private val searchBuilder = Retrofit.Builder()
+        .baseUrl(SEARCH_BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val httpClient = OkHttpClient.Builder()
+        .addInterceptor(AuthInterceptor(BuildConfig.NEWS_API_KEY))
+        .build()
+
+    private val newsBuilder = Retrofit.Builder()
+        .baseUrl(NEWS_BASE_URL)
+        .client(httpClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val api: NasaApiService = builder.create(NasaApiService::class.java)
+    private val searchApi: NasaApiService = searchBuilder.create(NasaApiService::class.java)
+    private val newsApi: NewsApiService = newsBuilder.create(NewsApiService::class.java)
     private val apiKey = BuildConfig.NASA_API_KEY
 
     override fun getPictureOfTheDay(
@@ -82,8 +103,31 @@ class RemoteRepoImpl : RemoteRepo {
         ).flow
     }
 
+    override suspend fun getSearchResultsStream(query: String): Flow<PagingData<SearchResult>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = NETWORK_PAGE_SIZE,
+                enablePlaceholders = false,
+                maxSize = 100,
+                prefetchDistance = 5,
+                initialLoadSize = NETWORK_PAGE_SIZE
+            ),
+            pagingSourceFactory = { NasaSearchPagingSource(searchApi, query) }
+        ).flow
+    }
+
+    override suspend fun getEverything(query: String): Flow<PagingData<NewsArticle>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = NETWORK_PAGE_SIZE,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { NewsPagingSource(newsApi, query) }
+        ).flow
+    }
+
     companion object {
-        const val NETWORK_PAGE_SIZE = 50
+        const val NETWORK_PAGE_SIZE = 25
     }
 
 }

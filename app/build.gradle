@@ -30,6 +30,8 @@ android {
         properties.load(project.rootProject.file("app.properties").newDataInputStream())
         def nasaApiKey = properties.getProperty("NASA_API_KEY", "")
         it.buildConfigField "String", "NASA_API_KEY", nasaApiKey
+        def newsApiKey = properties.getProperty("NEWS_API_KEY", "")
+        it.buildConfigField "String", "NEWS_API_KEY", newsApiKey
     }
     buildFeatures {
         viewBinding true

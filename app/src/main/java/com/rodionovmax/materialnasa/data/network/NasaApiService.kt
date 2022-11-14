@@ -2,7 +2,9 @@ package com.rodionovmax.materialnasa.data.network
 
 import com.rodionovmax.materialnasa.data.network.model.MarsResultsDto
 import com.rodionovmax.materialnasa.data.network.model.PodDto
+import com.rodionovmax.materialnasa.data.network.model.SearchResultDto
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -28,4 +30,9 @@ interface NasaApiService {
         @Query("api_key") apiKey: String,
         @Query("earth_date") earthDate: String,
     ) : MarsResultsDto
+
+    @GET("search")
+    suspend fun searchResults(
+        @Query("q") query: String
+    ) : SearchResultDto
 }

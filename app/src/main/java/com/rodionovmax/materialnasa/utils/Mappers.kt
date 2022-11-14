@@ -3,12 +3,11 @@ package com.rodionovmax.materialnasa.utils
 import com.rodionovmax.materialnasa.data.local.CameraPhotoEntity
 import com.rodionovmax.materialnasa.data.local.GalleryPodEntity
 import com.rodionovmax.materialnasa.data.local.RoverPhotoEntity
-import com.rodionovmax.materialnasa.data.model.GalleryPhoto
-import com.rodionovmax.materialnasa.data.model.MarsPhoto
-import com.rodionovmax.materialnasa.data.network.model.PodDto
-import com.rodionovmax.materialnasa.data.model.Pod
-import com.rodionovmax.materialnasa.data.model.SharedStoragePhoto
+import com.rodionovmax.materialnasa.data.model.*
+import com.rodionovmax.materialnasa.data.network.model.ArticleDto
+import com.rodionovmax.materialnasa.data.network.model.ItemsDto
 import com.rodionovmax.materialnasa.data.network.model.MarsResultsDto
+import com.rodionovmax.materialnasa.data.network.model.PodDto
 
 fun Pod.asEntity(): GalleryPodEntity = GalleryPodEntity(
     id = null,
@@ -122,6 +121,32 @@ fun GalleryPhoto.toPod(): Pod = Pod(
     name = null,
     bmp = bitmap,
     uri = null
+)
+
+fun asDomainSearchResults(itemsDto: List<ItemsDto?>): List<SearchResult> {
+    return itemsDto.map {
+        it?.let {
+            SearchResult(
+                id = itemsDto.indexOf(it),
+                title = it.data[0].title,
+                keywords = it.data[0].keywords,
+                description = it.data[0].description,
+                imgUrl = it.links?.get(0)?.url ?: ""
+            )
+        } ?: SearchResult()
+    }
+}
+
+fun ArticleDto.toArticle(): NewsArticle = NewsArticle(
+    id = null,
+    name = source?.name ?: "",
+    author = author ?: "",
+    title = title ?: "",
+    description = description ?: "",
+    url = url ?: "",
+    urlToImage = urlToImg ?: "",
+    publishedAt = publishedAt ?: "",
+    content = content ?: ""
 )
 
 /*
